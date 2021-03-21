@@ -1,5 +1,432 @@
 # @graphql-mesh/cli
 
+## 0.26.2
+
+### Patch Changes
+
+- Updated dependencies [0b175305a]
+  - @graphql-mesh/runtime@0.12.0
+  - @graphql-mesh/config@0.14.3
+
+## 0.26.1
+
+### Patch Changes
+
+- Updated dependencies [939f9beb5]
+  - @graphql-mesh/config@0.14.2
+
+## 0.26.0
+
+### Minor Changes
+
+- 7efbf045: Fix CLI usage of base-dir
+
+  **Breaking changes**
+  This is technically just a bug fix, but it corrects a behaviour that will break if you relied on it.
+  When using CLI commands with the `--dir` option, those commands were using your given `--dir` as the base directory.
+
+  Now CLI commands always use the Current Working Directory (CWD) as the base directory and so the given `--dir` is used to only get the Mesh Config file and process any local file eventually defined in the Config.
+
+- 191a663a: feat(cli): return server and express app from serveMesh
+
+### Patch Changes
+
+- Updated dependencies [191a663a]
+  - @graphql-mesh/config@0.14.1
+  - @graphql-mesh/runtime@0.11.9
+
+## 0.25.3
+
+### Patch Changes
+
+- Updated dependencies [b9ca0c30]
+  - @graphql-mesh/config@0.14.0
+  - @graphql-mesh/utils@0.9.0
+  - @graphql-mesh/runtime@0.11.8
+
+## 0.25.2
+
+### Patch Changes
+
+- cf58cd5c: enhance(serve): improve logging
+- Updated dependencies [cf58cd5c]
+  - @graphql-mesh/runtime@0.11.7
+  - @graphql-mesh/config@0.13.7
+
+## 0.25.1
+
+### Patch Changes
+
+- Updated dependencies [ec89a923]
+- Updated dependencies [ec89a923]
+  - @graphql-mesh/utils@0.8.8
+  - @graphql-mesh/runtime@0.11.6
+  - @graphql-mesh/config@0.13.6
+
+## 0.25.0
+
+### Minor Changes
+
+- b52859c6: enhance(serve): run custom handlers before anything else
+
+## 0.24.1
+
+### Patch Changes
+
+- @graphql-mesh/config@0.13.5
+- @graphql-mesh/runtime@0.11.5
+
+## 0.24.0
+
+### Minor Changes
+
+- 76051dd7: feat(serve): ability to change GraphQL endpoint path
+
+### Patch Changes
+
+- @graphql-mesh/config@0.13.4
+- @graphql-mesh/runtime@0.11.4
+
+## 0.23.4
+
+### Patch Changes
+
+- @graphql-mesh/config@0.13.3
+- @graphql-mesh/runtime@0.11.3
+
+## 0.23.3
+
+### Patch Changes
+
+- @graphql-mesh/config@0.13.2
+- @graphql-mesh/runtime@0.11.2
+
+## 0.23.2
+
+### Patch Changes
+
+- @graphql-mesh/config@0.13.1
+- @graphql-mesh/runtime@0.11.1
+
+## 0.23.1
+
+### Patch Changes
+
+- f9985ac8: fix(serve): ignore if xdg-open not available
+
+## 0.23.0
+
+### Minor Changes
+
+- 77327988: feat(runtime): Live Queries Support
+
+### Patch Changes
+
+- Updated dependencies [77327988]
+  - @graphql-mesh/config@0.13.0
+  - @graphql-mesh/runtime@0.11.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @graphql-mesh/config@0.12.6
+- @graphql-mesh/runtime@0.10.26
+
+## 0.22.0
+
+### Minor Changes
+
+- 970c43e2: feat(serve): better error handling, progress bar etc
+
+### Patch Changes
+
+- 2cfa421a: fix(serve): better error handling for schema generation errors
+
+## 0.21.0
+
+### Minor Changes
+
+- ea3a183b: Added health checks /healthcheck /readiness
+
+## 0.20.2
+
+### Patch Changes
+
+- @graphql-mesh/config@0.12.5
+- @graphql-mesh/runtime@0.10.25
+
+## 0.20.1
+
+### Patch Changes
+
+- @graphql-mesh/config@0.12.4
+- @graphql-mesh/runtime@0.10.24
+
+## 0.20.0
+
+### Minor Changes
+
+- a02d86c3: feat(serve): add HTTPS support
+- a02d86c3: feat(serve): use GraphQL Helix's version of GraphiQL for playground
+- a02d86c3: feat(serve): ability to change binding hostname
+
+### Patch Changes
+
+- a02d86c3: fix(runtime): patch graphql-compose schemas to support @defer and @stream
+- Updated dependencies [a02d86c3]
+  - @graphql-mesh/runtime@0.10.23
+  - @graphql-mesh/config@0.12.3
+
+## 0.19.2
+
+### Patch Changes
+
+- Updated dependencies [69d2198d]
+  - @graphql-mesh/utils@0.8.7
+  - @graphql-mesh/config@0.12.2
+  - @graphql-mesh/runtime@0.10.22
+
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies [bf6c517d]
+  - @graphql-mesh/runtime@0.10.21
+  - @graphql-mesh/config@0.12.1
+
+## 0.19.0
+
+### Minor Changes
+
+- 63e12ef3: Better config validations, allow to set --dir in cli for base path
+
+### Patch Changes
+
+- Updated dependencies [63e12ef3]
+  - @graphql-mesh/config@0.12.0
+
+## 0.18.0
+
+### Minor Changes
+
+- 8e8848e1: feat(serve): ability to change maxRequestBodySize
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.20
+- @graphql-mesh/runtime@0.10.20
+
+## 0.17.1
+
+### Patch Changes
+
+- Updated dependencies [7e970f09]
+  - @graphql-mesh/utils@0.8.6
+  - @graphql-mesh/config@0.11.19
+  - @graphql-mesh/runtime@0.10.19
+
+## 0.17.0
+
+### Minor Changes
+
+- e8994875: feat(serve): ability to change maxFileSize and maxFiles for graphql-upload
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.18
+- @graphql-mesh/runtime@0.10.18
+
+## 0.16.3
+
+### Patch Changes
+
+- Updated dependencies [8d345721]
+  - @graphql-mesh/utils@0.8.5
+  - @graphql-mesh/config@0.11.17
+  - @graphql-mesh/runtime@0.10.17
+
+## 0.16.2
+
+### Patch Changes
+
+- c767df01: fix(fs): fix fs handling issues for non Node environments
+- b3d7ecbf: chore(deps): replace fs-extra with native fs
+- Updated dependencies [c767df01]
+- Updated dependencies [b3d7ecbf]
+  - @graphql-mesh/runtime@0.10.16
+  - @graphql-mesh/utils@0.8.4
+  - @graphql-mesh/config@0.11.16
+
+## 0.16.1
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.15
+- @graphql-mesh/runtime@0.10.15
+
+## 0.16.0
+
+### Minor Changes
+
+- c1de3e43: feat(cli): add `playground` option to serve configuration
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.14
+- @graphql-mesh/runtime@0.10.14
+
+## 0.15.7
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.13
+- @graphql-mesh/runtime@0.10.13
+
+## 0.15.6
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.12
+- @graphql-mesh/runtime@0.10.12
+
+## 0.15.5
+
+### Patch Changes
+
+- Updated dependencies [08c2966e]
+- Updated dependencies [08c2966e]
+  - @graphql-mesh/utils@0.8.3
+  - @graphql-mesh/config@0.11.11
+  - @graphql-mesh/runtime@0.10.11
+
+## 0.15.4
+
+### Patch Changes
+
+- 0b08b2a6: fix(generate-sdk): fix mismatch TS definitions for scalars
+
+## 0.15.3
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.10
+- @graphql-mesh/runtime@0.10.10
+
+## 0.15.2
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.9
+- @graphql-mesh/runtime@0.10.9
+
+## 0.15.1
+
+### Patch Changes
+
+- a7dcd2d9: fix(cli): fix enum values mismatch in generated sdk
+
+## 0.15.0
+
+### Minor Changes
+
+- bccbb9ca: feat(cli): export serve command
+
+## 0.14.1
+
+### Patch Changes
+
+- Updated dependencies [c85a54eb]
+  - @graphql-mesh/utils@0.8.2
+  - @graphql-mesh/config@0.11.8
+  - @graphql-mesh/runtime@0.10.8
+
+## 0.14.0
+
+### Minor Changes
+
+- 1ba078b8: Added a new cli command for printing the static mesh schema to a file
+
+### Patch Changes
+
+- 438b5250: feat(cli): rename schema dump command
+  - @graphql-mesh/config@0.11.7
+  - @graphql-mesh/runtime@0.10.7
+
+## 0.13.0
+
+### Minor Changes
+
+- c8389f64: feat(generate-sdk): add flattenTypes option to generate sdk smaller
+
+## 0.12.6
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.6
+- @graphql-mesh/runtime@0.10.6
+
+## 0.12.5
+
+### Patch Changes
+
+- Updated dependencies [0129bebb]
+  - @graphql-mesh/config@0.11.5
+  - @graphql-mesh/runtime@0.10.5
+
+## 0.12.4
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.4
+- @graphql-mesh/runtime@0.10.4
+
+## 0.12.3
+
+### Patch Changes
+
+- Updated dependencies [c064e3a8]
+  - @graphql-mesh/utils@0.8.1
+  - @graphql-mesh/config@0.11.3
+  - @graphql-mesh/runtime@0.10.3
+
+## 0.12.2
+
+### Patch Changes
+
+- 1f0b2f1f: enhance(cli): improve error messages
+- Updated dependencies [1f0b2f1f]
+  - @graphql-mesh/runtime@0.10.2
+  - @graphql-mesh/config@0.11.2
+
+## 0.12.1
+
+### Patch Changes
+
+- @graphql-mesh/config@0.11.1
+- @graphql-mesh/runtime@0.10.1
+
+## 0.12.0
+
+### Minor Changes
+
+- 2d14fcc3: bump graphql-tools to v7
+- 2d14fcc3: feat(graphql): use graphql-ws instead of subscriptions-transport-ws
+
+### Patch Changes
+
+- Updated dependencies [2d14fcc3]
+  - @graphql-mesh/config@0.11.0
+  - @graphql-mesh/runtime@0.10.0
+  - @graphql-mesh/utils@0.8.0
+
+## 0.11.14
+
+### Patch Changes
+
+- Updated dependencies [bf3e1d3a]
+  - @graphql-mesh/config@0.10.19
+
 ## 0.11.13
 
 ### Patch Changes

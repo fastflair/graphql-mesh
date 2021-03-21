@@ -1,29 +1,45 @@
 import { GetMeshSourceOptions, MeshHandler, YamlConfig, KeyValueCache } from '@graphql-mesh/types';
 import { soapGraphqlSchema, createSoapClient } from 'soap-graphql';
 import { WSSecurityCert } from 'soap';
-import { readFileOrUrlWithCache } from '@graphql-mesh/utils';
+import { loadFromModuleExportExpression, readFileOrUrlWithCache } from '@graphql-mesh/utils';
 import { Request, fetchache } from 'fetchache';
 
 type AnyFn = (...args: any[]) => any;
 
 export default class SoapHandler implements MeshHandler {
-  config: YamlConfig.SoapHandler;
-  cache: KeyValueCache;
+  private config: YamlConfig.SoapHandler;
+  private baseDir: string;
+  private cache: KeyValueCache;
 
-  constructor({ config, cache }: GetMeshSourceOptions<YamlConfig.SoapHandler>) {
+  constructor({ config, baseDir, cache }: GetMeshSourceOptions<YamlConfig.SoapHandler>) {
     this.config = config;
+    this.baseDir = baseDir;
     this.cache = cache;
   }
 
   async getMeshSource() {
+    let schemaHeaders =
+      typeof this.config.schemaHeaders === 'string'
+        ? await loadFromModuleExportExpression(this.config.schemaHeaders, { cwd: this.baseDir })
+        : this.config.schemaHeaders;
+    if (typeof schemaHeaders === 'function') {
+      schemaHeaders = schemaHeaders();
+    }
+    if (schemaHeaders && 'then' in schemaHeaders) {
+      schemaHeaders = await schemaHeaders;
+    }
     const soapClient = await createSoapClient(this.config.wsdl, {
       basicAuth: this.config.basicAuth,
       options: {
         request: ((requestObj: any, callback: AnyFn) => {
           let _request: any = null;
           const sendRequest = async () => {
+            const headers = {
+              ...requestObj.headers,
+              ...(requestObj.uri.href === this.config.wsdl ? schemaHeaders : this.config.operationHeaders),
+            };
             const req = new Request(requestObj.uri.href, {
-              headers: requestObj.headers,
+              headers,
               method: requestObj.method,
               body: requestObj.body,
             });
@@ -58,16 +74,19 @@ export default class SoapHandler implements MeshHandler {
           (securityCertConfig.privateKeyPath &&
             readFileOrUrlWithCache<string>(securityCertConfig.privateKeyPath, this.cache, {
               allowUnknownExtensions: true,
+              cwd: this.baseDir,
             })),
         securityCertConfig.publicKey ||
           (securityCertConfig.publicKeyPath &&
             readFileOrUrlWithCache<string>(securityCertConfig.publicKeyPath, this.cache, {
               allowUnknownExtensions: true,
+              cwd: this.baseDir,
             })),
         securityCertConfig.password ||
           (securityCertConfig.passwordPath &&
             readFileOrUrlWithCache<string>(securityCertConfig.passwordPath, this.cache, {
               allowUnknownExtensions: true,
+              cwd: this.baseDir,
             })),
       ]);
       soapClient.setSecurity(new WSSecurityCert(privateKey, publicKey, password));

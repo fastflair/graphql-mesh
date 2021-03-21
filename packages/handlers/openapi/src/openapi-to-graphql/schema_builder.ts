@@ -962,7 +962,7 @@ function skipArg<TSource, TContext, TArgs>(
         if (typeof data.options.headers === 'object' && parameter.name in data.options.headers) {
           return true;
         } else if (typeof data.options.headers === 'function') {
-          const headers = data.options.headers(operation.method, operation.path, operation.oas.info.title);
+          const headers = data.options.headers(operation.method, operation.path, operation.oas.info?.title);
 
           if (typeof headers === 'object') {
             return true;
@@ -981,7 +981,7 @@ function skipArg<TSource, TContext, TArgs>(
             const headers = data.options.requestOptions.headers(
               operation.method,
               operation.path,
-              operation.oas.info.title
+              operation.oas.info?.title
             )
 
             if (typeof headers === 'object') {
@@ -1057,11 +1057,16 @@ export function getArgs<TSource, TContext, TArgs>({
     if (typeof parameter.schema === 'object') {
       schema = parameter.schema;
     } else if (typeof parameter.content === 'object') {
+      const contentTypes = Object.keys(parameter.content);
+      const jsonContentType = contentTypes.find(
+        contentType => contentType.toString().includes('application/json') || contentType.toString().includes('*/*')
+      );
       if (
-        typeof parameter.content['application/json'] === 'object' &&
-        typeof parameter.content['application/json'].schema === 'object'
+        jsonContentType &&
+        typeof parameter.content[jsonContentType] === 'object' &&
+        typeof parameter.content[jsonContentType].schema === 'object'
       ) {
-        schema = parameter.content['application/json'].schema;
+        schema = parameter.content[jsonContentType].schema;
       } else {
         handleWarning({
           mitigationType: MitigationTypes.NON_APPLICATION_JSON_SCHEMA,
@@ -1229,7 +1234,7 @@ function getOasFromLinkLocation<TSource, TContext, TArgs>(
     case 'title':
       // Get the possible
       const possibleOass = data.oass.filter(oas => {
-        return oas.info.title === linkLocation;
+        return oas.info?.title === linkLocation;
       });
 
       // Check if there are an ambiguous OASs

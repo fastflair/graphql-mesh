@@ -6,17 +6,20 @@ import * as tsGenericSdkPlugin from '@graphql-codegen/typescript-generic-sdk';
 import { loadDocuments as loadDocumentsToolkit } from '@graphql-tools/load';
 import { CodeFileLoader } from '@graphql-tools/code-file-loader';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
-import { buildOperationNodeForField, Operation, Source } from '@graphql-tools/utils';
-import { scalarsMap } from './scalars-map';
+import { buildOperationNodeForField, Source } from '@graphql-tools/utils';
+import { clientSideScalarsMap } from './scalars-map';
+import { logger } from '../logger';
 
 export async function generateSdk(
   schema: GraphQLSchema,
   {
     operations: operationsPaths = [],
     depth: depthLimit = 1,
+    'flatten-types': flattenTypes,
   }: {
     operations?: string[];
     depth?: number;
+    'flatten-types': boolean;
   }
 ): Promise<string> {
   let sources: Source[] = [];
@@ -27,6 +30,9 @@ export async function generateSdk(
       cwd: process.cwd(),
     });
   } else {
+    logger.warn(`You didn't provide operations for SDK! 
+Mesh CLI will try to generate operations for you but this might not be efficient for production usage. 
+See more: https://graphql-mesh.com/docs/recipes/as-sdk`);
     const rootTypeMap = {
       query: schema.getQueryType(),
       mutation: schema.getMutationType(),
@@ -39,7 +45,7 @@ export async function generateSdk(
           const operation = buildOperationNodeForField({
             schema,
             field: fieldName,
-            kind: operationType as Operation,
+            kind: operationType as any,
             depthLimit,
           });
           const document = {
@@ -69,7 +75,9 @@ export async function generateSdk(
     schemaAst: schema,
     plugins: [
       {
-        typescript: {},
+        typescript: {
+          ignoreEnumValuesFromSchema: true,
+        },
       },
       {
         typescriptOperations: {},
@@ -79,10 +87,10 @@ export async function generateSdk(
       },
     ],
     config: {
-      flattenGeneratedTypes: true,
-      scalars: scalarsMap,
-      onlyOperationTypes: true,
-      preResolveTypes: true,
+      flattenGeneratedTypes: flattenTypes,
+      scalars: clientSideScalarsMap,
+      onlyOperationTypes: flattenTypes,
+      preResolveTypes: flattenTypes,
       namingConvention: {
         enumValues: 'keep',
       },

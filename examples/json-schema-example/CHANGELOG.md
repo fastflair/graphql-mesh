@@ -1,5 +1,419 @@
 # json-schema-example
 
+## 0.5.84
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.26.2
+
+## 0.5.83
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.26.1
+
+## 0.5.82
+
+### Patch Changes
+
+- Updated dependencies [7efbf045]
+- Updated dependencies [191a663a]
+  - @graphql-mesh/cli@0.26.0
+  - @graphql-mesh/json-schema@0.11.1
+  - @graphql-mesh/transform-mock@0.8.1
+
+## 0.5.81
+
+### Patch Changes
+
+- Updated dependencies [b9ca0c30]
+  - @graphql-mesh/json-schema@0.11.0
+  - @graphql-mesh/transform-mock@0.8.0
+  - @graphql-mesh/cli@0.25.3
+
+## 0.5.80
+
+### Patch Changes
+
+- Updated dependencies [cf58cd5c]
+  - @graphql-mesh/cli@0.25.2
+
+## 0.5.79
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.25.1
+- @graphql-mesh/json-schema@0.10.9
+- @graphql-mesh/transform-mock@0.7.7
+
+## 0.5.78
+
+### Patch Changes
+
+- Updated dependencies [b52859c6]
+  - @graphql-mesh/cli@0.25.0
+
+## 0.5.77
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.10.8
+- @graphql-mesh/transform-mock@0.7.6
+- @graphql-mesh/cli@0.24.1
+
+## 0.5.76
+
+### Patch Changes
+
+- Updated dependencies [76051dd7]
+  - @graphql-mesh/cli@0.24.0
+  - @graphql-mesh/json-schema@0.10.7
+  - @graphql-mesh/transform-mock@0.7.5
+
+## 0.5.75
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.10.6
+- @graphql-mesh/transform-mock@0.7.4
+- @graphql-mesh/cli@0.23.4
+
+## 0.5.74
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.10.5
+- @graphql-mesh/transform-mock@0.7.3
+- @graphql-mesh/cli@0.23.3
+
+## 0.5.73
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.10.4
+- @graphql-mesh/transform-mock@0.7.2
+- @graphql-mesh/cli@0.23.2
+
+## 0.5.72
+
+### Patch Changes
+
+- Updated dependencies [f9985ac8]
+- Updated dependencies [f9985ac8]
+  - @graphql-mesh/cli@0.23.1
+  - @graphql-mesh/json-schema@0.10.3
+
+## 0.5.71
+
+### Patch Changes
+
+- Updated dependencies [77327988]
+  - @graphql-mesh/cli@0.23.0
+  - @graphql-mesh/json-schema@0.10.2
+  - @graphql-mesh/transform-mock@0.7.1
+
+## 0.5.70
+
+### Patch Changes
+
+- Updated dependencies [3f307c8c]
+  - @graphql-mesh/transform-mock@0.7.0
+
+## 0.5.69
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.10.1
+- @graphql-mesh/transform-mock@0.6.25
+- @graphql-mesh/cli@0.22.1
+
+## 0.5.68
+
+### Patch Changes
+
+- Updated dependencies [970c43e2]
+- Updated dependencies [2cfa421a]
+  - @graphql-mesh/cli@0.22.0
+
+## 0.5.67
+
+### Patch Changes
+
+- Updated dependencies [ea3a183b]
+  - @graphql-mesh/cli@0.21.0
+
+## 0.5.66
+
+### Patch Changes
+
+- Updated dependencies [938cca26]
+  - @graphql-mesh/json-schema@0.10.0
+  - @graphql-mesh/transform-mock@0.6.24
+  - @graphql-mesh/cli@0.20.2
+
+## 0.5.65
+
+### Patch Changes
+
+- Updated dependencies [1d21d02a]
+  - @graphql-mesh/json-schema@0.9.8
+  - @graphql-mesh/transform-mock@0.6.23
+  - @graphql-mesh/cli@0.20.1
+
+## 0.5.64
+
+### Patch Changes
+
+- Updated dependencies [a02d86c3]
+- Updated dependencies [a02d86c3]
+- Updated dependencies [a02d86c3]
+- Updated dependencies [a02d86c3]
+  - @graphql-mesh/cli@0.20.0
+  - @graphql-mesh/json-schema@0.9.7
+  - @graphql-mesh/transform-mock@0.6.22
+
+## 0.5.63
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.19.2
+- @graphql-mesh/json-schema@0.9.6
+- @graphql-mesh/transform-mock@0.6.21
+
+## 0.5.62
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.19.1
+
+## 0.5.61
+
+### Patch Changes
+
+- Updated dependencies [63e12ef3]
+  - @graphql-mesh/cli@0.19.0
+
+## 0.5.60
+
+### Patch Changes
+
+- Updated dependencies [79b2c291]
+  - @graphql-mesh/json-schema@0.9.5
+
+## 0.5.59
+
+### Patch Changes
+
+- Updated dependencies [8e8848e1]
+  - @graphql-mesh/cli@0.18.0
+  - @graphql-mesh/json-schema@0.9.4
+  - @graphql-mesh/transform-mock@0.6.20
+
+## 0.5.58
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.17.1
+- @graphql-mesh/json-schema@0.9.3
+- @graphql-mesh/transform-mock@0.6.19
+
+## 0.5.57
+
+### Patch Changes
+
+- Updated dependencies [e8994875]
+  - @graphql-mesh/cli@0.17.0
+  - @graphql-mesh/json-schema@0.9.2
+  - @graphql-mesh/transform-mock@0.6.18
+
+## 0.5.56
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.16.3
+- @graphql-mesh/json-schema@0.9.1
+- @graphql-mesh/transform-mock@0.6.17
+
+## 0.5.55
+
+### Patch Changes
+
+- Updated dependencies [c767df01]
+- Updated dependencies [b3d7ecbf]
+- Updated dependencies [f575515f]
+  - @graphql-mesh/cli@0.16.2
+  - @graphql-mesh/json-schema@0.9.0
+  - @graphql-mesh/transform-mock@0.6.16
+
+## 0.5.54
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.21
+- @graphql-mesh/transform-mock@0.6.15
+- @graphql-mesh/cli@0.16.1
+
+## 0.5.53
+
+### Patch Changes
+
+- Updated dependencies [c1de3e43]
+  - @graphql-mesh/cli@0.16.0
+  - @graphql-mesh/json-schema@0.8.20
+  - @graphql-mesh/transform-mock@0.6.14
+
+## 0.5.52
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.19
+- @graphql-mesh/transform-mock@0.6.13
+- @graphql-mesh/cli@0.15.7
+
+## 0.5.51
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.18
+- @graphql-mesh/transform-mock@0.6.12
+- @graphql-mesh/cli@0.15.6
+
+## 0.5.50
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.15.5
+- @graphql-mesh/json-schema@0.8.17
+- @graphql-mesh/transform-mock@0.6.11
+
+## 0.5.49
+
+### Patch Changes
+
+- Updated dependencies [0b08b2a6]
+  - @graphql-mesh/cli@0.15.4
+
+## 0.5.48
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.16
+- @graphql-mesh/transform-mock@0.6.10
+- @graphql-mesh/cli@0.15.3
+
+## 0.5.47
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.15
+- @graphql-mesh/transform-mock@0.6.9
+- @graphql-mesh/cli@0.15.2
+
+## 0.5.46
+
+### Patch Changes
+
+- Updated dependencies [a7dcd2d9]
+  - @graphql-mesh/cli@0.15.1
+
+## 0.5.45
+
+### Patch Changes
+
+- Updated dependencies [bccbb9ca]
+  - @graphql-mesh/cli@0.15.0
+
+## 0.5.44
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.14.1
+- @graphql-mesh/json-schema@0.8.14
+- @graphql-mesh/transform-mock@0.6.8
+
+## 0.5.43
+
+### Patch Changes
+
+- Updated dependencies [438b5250]
+- Updated dependencies [1ba078b8]
+  - @graphql-mesh/cli@0.14.0
+  - @graphql-mesh/json-schema@0.8.13
+  - @graphql-mesh/transform-mock@0.6.7
+
+## 0.5.42
+
+### Patch Changes
+
+- Updated dependencies [c8389f64]
+  - @graphql-mesh/cli@0.13.0
+
+## 0.5.41
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.12
+- @graphql-mesh/transform-mock@0.6.6
+- @graphql-mesh/cli@0.12.6
+
+## 0.5.40
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.12.5
+- @graphql-mesh/json-schema@0.8.11
+- @graphql-mesh/transform-mock@0.6.5
+
+## 0.5.39
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.10
+- @graphql-mesh/transform-mock@0.6.4
+- @graphql-mesh/cli@0.12.4
+
+## 0.5.38
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.9
+- @graphql-mesh/transform-mock@0.6.3
+- @graphql-mesh/cli@0.12.3
+
+## 0.5.37
+
+### Patch Changes
+
+- Updated dependencies [1f0b2f1f]
+  - @graphql-mesh/cli@0.12.2
+  - @graphql-mesh/json-schema@0.8.8
+  - @graphql-mesh/transform-mock@0.6.2
+
+## 0.5.36
+
+### Patch Changes
+
+- @graphql-mesh/json-schema@0.8.7
+- @graphql-mesh/transform-mock@0.6.1
+- @graphql-mesh/cli@0.12.1
+
+## 0.5.35
+
+### Patch Changes
+
+- Updated dependencies [2d14fcc3]
+- Updated dependencies [2d14fcc3]
+- Updated dependencies [2d14fcc3]
+  - @graphql-mesh/json-schema@0.8.6
+  - @graphql-mesh/cli@0.12.0
+  - @graphql-mesh/transform-mock@0.6.0
+
+## 0.5.34
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.11.14
+
 ## 0.5.33
 
 ### Patch Changes

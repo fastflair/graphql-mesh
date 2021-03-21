@@ -7,13 +7,16 @@ extend type Handler {
 
 type GraphQLHandler @md {
   """
-  A url to your remote GraphQL endpoint
+  A url or file path to your remote GraphQL endpoint.
+  If you provide a path to a code file(js or ts),
+  other options will be ignored and the schema exported from the file will be used directly.
   """
   endpoint: String!
   """
   JSON object representing the Headers to add to the runtime of the API calls only for schema introspection
+  You can also provide `.js` or `.ts` file path that exports schemaHeaders as an object
   """
-  schemaHeaders: JSON
+  schemaHeaders: Any
   """
   JSON object representing the Headers to add to the runtime of the API calls only for operation during runtime
   """
@@ -27,9 +30,9 @@ type GraphQLHandler @md {
   """
   method: GraphQLHandlerHTTPMethod
   """
-  Enable GraphQL Subscriptions using WebSocket
+  Use Server Sent Events instead of WebSocket for Subscriptions
   """
-  enableSubscriptions: Boolean
+  useSSEForSubscription: Boolean
   """
   Path to a custom W3 Compatible Fetch Implementation
   """
@@ -47,6 +50,14 @@ type GraphQLHandler @md {
   Cache Introspection
   """
   cacheIntrospection: GraphQLCacheIntrospectionConfig
+  """
+  Enable multipart/formdata in order to support file uploads
+  """
+  multipart: Boolean
+  """
+  Batch requests
+  """
+  batch: Boolean
 }
 
 union GraphQLCacheIntrospectionConfig = GraphQLIntrospectionCachingOptions | Boolean

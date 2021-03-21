@@ -2,8 +2,8 @@ import { MergerFn } from '@graphql-mesh/types';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { wrapSchema } from '@graphql-tools/wrap';
 import { mergeSingleSchema } from './mergeSingleSchema';
-import { groupTransforms } from '@graphql-mesh/utils';
-import { applySchemaTransforms } from '@graphql-tools/utils';
+import { groupTransforms, applySchemaTransforms } from '@graphql-mesh/utils';
+import { StitchingInfo } from '@graphql-tools/stitch/types';
 
 const mergeUsingStitching: MergerFn = async function (options) {
   if (options.rawSources.length === 1) {
@@ -17,7 +17,13 @@ const mergeUsingStitching: MergerFn = async function (options) {
   });
   unifiedSchema.extensions = unifiedSchema.extensions || {};
   Object.defineProperty(unifiedSchema.extensions, 'sourceMap', {
-    get: () => unifiedSchema.extensions.stitchingInfo.transformedSchemas,
+    get: () => {
+      const stitchingInfo: StitchingInfo = unifiedSchema.extensions.stitchingInfo;
+      const entries = stitchingInfo.subschemaMap.entries();
+      return new Map(
+        [...entries].map(([subschemaConfig, subschema]) => [subschemaConfig, subschema.transformedSchema])
+      );
+    },
   });
   if (transforms?.length) {
     const { noWrapTransforms, wrapTransforms } = groupTransforms(transforms);
@@ -29,7 +35,7 @@ const mergeUsingStitching: MergerFn = async function (options) {
       });
     }
     if (noWrapTransforms.length) {
-      unifiedSchema = applySchemaTransforms(unifiedSchema, noWrapTransforms);
+      unifiedSchema = applySchemaTransforms(unifiedSchema, { schema: unifiedSchema }, null, noWrapTransforms);
     }
   }
   return unifiedSchema;

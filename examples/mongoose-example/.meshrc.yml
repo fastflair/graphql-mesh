@@ -1,10 +1,10 @@
-require:
-  - ts-node/register/transpile-only
 sources:
   - name: Mongoose
     handler:
       mongoose:
-        connectionString: mongodb://localhost:27017/test
         models:
           - name: User
-            path: ./src/models.ts#User
+            path: ./src/models.js#User
+
+serve:
+  exampleQuery: ./example-queries/*.graphql

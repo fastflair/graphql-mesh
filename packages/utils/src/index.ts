@@ -6,3 +6,5 @@ export * from './with-cancel';
 export * from './extract-resolvers';
 export * from './ensure-document-node';
 export * from './group-transforms';
+export * from './apply-transforms';
+export * from './fs-operations';

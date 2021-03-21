@@ -101,7 +101,7 @@ export function getSubscribe<TSource, TContext, TArgs>({
 
   // Return custom resolver if it is defined
   const customResolvers = data.options.customSubscriptionResolvers;
-  const title = operation.oas.info.title;
+  const title = operation.oas.info?.title;
   const path = operation.path;
   const method = operation.method;
 
@@ -203,7 +203,7 @@ export function getPublishResolver<TSource, TContext, TArgs>({
 }: GetResolverParams<TSource, TContext, TArgs>): GraphQLFieldResolver<TSource, TContext, TArgs> {
   // Return custom resolver if it is defined
   const customResolvers = data.options.customSubscriptionResolvers;
-  const title = operation.oas.info.title;
+  const title = operation.oas.info?.title;
   const path = operation.path;
   const method = operation.method;
 
@@ -303,7 +303,7 @@ export function getResolver<TSource, TContext, TArgs>(
 
   // Return custom resolver if it is defined
   const customResolvers = data.options.customResolvers;
-  const title = operation.oas.info.title;
+  const title = operation.oas.info?.title;
   const path = operation.path;
   const method = operation.method;
 
@@ -468,9 +468,9 @@ export function getResolver<TSource, TContext, TArgs>(
         : Oas3Tools.sanitize(payloadName, Oas3Tools.CaseStyle.camelCase);
 
       let rawPayload;
-      if (operation.payloadContentType === 'application/json') {
+      if (operation.payloadContentType.includes('application/json') || operation.payloadContentType.includes('*/*')) {
         rawPayload = JSON.stringify(Oas3Tools.desanitizeObjectKeys(args[sanePayloadName], data.saneMap));
-      } else if (operation.payloadContentType === 'application/x-www-form-urlencoded') {
+      } else if (operation.payloadContentType.includes('application/x-www-form-urlencoded')) {
         rawPayload = formurlencoded(Oas3Tools.desanitizeObjectKeys(args[sanePayloadName], data.saneMap));
       } else {
         // Payload is not an object

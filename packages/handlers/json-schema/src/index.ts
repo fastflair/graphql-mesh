@@ -1,12 +1,18 @@
 import { GetMeshSourceOptions, MeshHandler, MeshPubSub, YamlConfig } from '@graphql-mesh/types';
 import { JSONSchemaVisitor, getFileName } from './json-schema-visitor';
 import urlJoin from 'url-join';
-import { readFileOrUrlWithCache, stringInterpolator, parseInterpolationStrings, isUrl } from '@graphql-mesh/utils';
-import AggregateError from 'aggregate-error';
+import {
+  readFileOrUrlWithCache,
+  stringInterpolator,
+  parseInterpolationStrings,
+  isUrl,
+  pathExists,
+  writeJSON,
+} from '@graphql-mesh/utils';
+import AggregateError from '@ardatan/aggregate-error';
 import { fetchache, Request, KeyValueCache } from 'fetchache';
 import { JSONSchemaDefinition } from './json-schema-types';
-import { SchemaComposer } from 'graphql-compose';
-import { pathExists, stat, writeJSON } from 'fs-extra';
+import { ObjectTypeComposerFieldConfigDefinition, SchemaComposer } from 'graphql-compose';
 import toJsonSchema from 'to-json-schema';
 import {
   GraphQLJSON,
@@ -21,6 +27,10 @@ import {
   GraphQLIPv4,
   GraphQLIPv6,
 } from 'graphql-scalars';
+import { promises as fsPromises } from 'fs';
+import { specifiedDirectives } from 'graphql';
+
+const { stat } = fsPromises || {};
 
 type CachedSchema = {
   timestamp: number;
@@ -29,10 +39,13 @@ type CachedSchema = {
 
 export default class JsonSchemaHandler implements MeshHandler {
   public config: YamlConfig.JsonSchemaHandler;
+  private baseDir: string;
   public cache: KeyValueCache<any>;
   public pubsub: MeshPubSub;
-  constructor({ config, cache, pubsub }: GetMeshSourceOptions<YamlConfig.JsonSchemaHandler>) {
+
+  constructor({ config, baseDir, cache, pubsub }: GetMeshSourceOptions<YamlConfig.JsonSchemaHandler>) {
     this.config = config;
+    this.baseDir = baseDir;
     this.cache = cache;
     this.pubsub = pubsub;
   }
@@ -77,6 +90,7 @@ export default class JsonSchemaHandler implements MeshHandler {
     if (this.config.baseSchema) {
       const basedFilePath = this.config.baseSchema;
       const baseSchema = await readFileOrUrlWithCache(basedFilePath, this.cache, {
+        cwd: this.baseDir,
         headers: this.config.schemaHeaders,
       });
       externalFileCache.set(basedFilePath, baseSchema);
@@ -116,11 +130,13 @@ export default class JsonSchemaHandler implements MeshHandler {
         requestSchema ||
           (operationConfig.requestSchema &&
             readFileOrUrlWithCache(operationConfig.requestSchema, this.cache, {
+              cwd: this.baseDir,
               headers: this.config.schemaHeaders,
             })),
         responseSchema ||
           (operationConfig.responseSchema &&
             readFileOrUrlWithCache(operationConfig.responseSchema, this.cache, {
+              cwd: this.baseDir,
               headers: this.config.schemaHeaders,
             })),
       ]);
@@ -173,82 +189,101 @@ export default class JsonSchemaHandler implements MeshHandler {
       }
 
       const destination = operationConfig.type;
-      schemaComposer[destination].addFields({
-        [operationConfig.field]: {
-          description:
-            operationConfig.description ||
-            responseSchema?.description ||
-            `${operationConfig.method} ${operationConfig.path}`,
-          type: responseTypeName,
-          args,
-          resolve: async (root, args, context, info) => {
-            const interpolationData = { root, args, context, info };
-            if (operationConfig.pubsubTopic) {
-              const pubsubTopic = stringInterpolator.parse(operationConfig.pubsubTopic, interpolationData);
-              return this.pubsub.asyncIterator(pubsubTopic);
-            } else if (operationConfig.path) {
-              const interpolatedPath = stringInterpolator.parse(operationConfig.path, interpolationData);
-              const fullPath = urlJoin(this.config.baseUrl, interpolatedPath);
-              const method = operationConfig.method;
-              const headers = {
-                ...this.config.operationHeaders,
-                ...operationConfig?.headers,
-              };
-              for (const headerName in headers) {
-                headers[headerName] = stringInterpolator.parse(headers[headerName], interpolationData);
+      const fieldConfig: ObjectTypeComposerFieldConfigDefinition<any, any> = {
+        description:
+          operationConfig.description || responseSchema?.description || operationConfig.path
+            ? `${operationConfig.method} ${operationConfig.path}`
+            : operationConfig.pubsubTopic
+            ? `PubSub Topic: ${operationConfig.pubsubTopic}`
+            : '',
+        type: responseTypeName,
+        args,
+      };
+      if (operationConfig.pubsubTopic) {
+        fieldConfig.subscribe = (root, args, context, info) => {
+          const interpolationData = { root, args, context, info };
+          const pubsubTopic = stringInterpolator.parse(operationConfig.pubsubTopic, interpolationData);
+          return this.pubsub.asyncIterator(pubsubTopic);
+        };
+        fieldConfig.resolve = root => root;
+      } else if (operationConfig.path) {
+        fieldConfig.resolve = async (root, args, context, info) => {
+          const interpolationData = { root, args, context, info };
+          const interpolatedPath = stringInterpolator.parse(operationConfig.path, interpolationData);
+          const fullPath = urlJoin(this.config.baseUrl, interpolatedPath);
+          const method = operationConfig.method;
+          const headers = {
+            ...this.config.operationHeaders,
+            ...operationConfig?.headers,
+          };
+          for (const headerName in headers) {
+            headers[headerName] = stringInterpolator.parse(headers[headerName], interpolationData);
+          }
+          const requestInit: RequestInit = {
+            method,
+            headers,
+          };
+          const urlObj = new URL(fullPath);
+          const input = args.input;
+          if (input) {
+            switch (method) {
+              case 'GET':
+              case 'DELETE': {
+                const newSearchParams = new URLSearchParams(input);
+                newSearchParams.forEach((value, key) => {
+                  urlObj.searchParams.set(key, value);
+                });
+                break;
               }
-              const requestInit: RequestInit = {
-                method,
-                headers,
-              };
-              const urlObj = new URL(fullPath);
-              const input = args.input;
-              if (input) {
-                switch (method) {
-                  case 'GET':
-                  case 'DELETE': {
-                    const newSearchParams = new URLSearchParams(input);
-                    newSearchParams.forEach((value, key) => {
-                      urlObj.searchParams.set(key, value);
-                    });
-                    break;
-                  }
-                  case 'POST':
-                  case 'PUT': {
-                    requestInit.body = JSON.stringify(input);
-                    break;
-                  }
-                  default:
-                    throw new Error(`Unknown method ${operationConfig.method}`);
-                }
+              case 'POST':
+              case 'PUT':
+              case 'PATCH': {
+                requestInit.body = JSON.stringify(input);
+                break;
               }
-              const request = new Request(urlObj.toString(), requestInit);
-              const response = await fetchache(request, this.cache);
-              const responseText = await response.text();
-              let responseJson: any;
-              try {
-                responseJson = JSON.parse(responseText);
-              } catch (e) {
-                throw responseText;
-              }
-              if (responseJson.errors) {
-                throw new AggregateError(responseJson.errors);
-              }
-              if (responseJson._errors) {
-                throw new AggregateError(responseJson._errors);
-              }
-              if (responseJson.error) {
-                throw responseJson.error;
-              }
-              return responseJson;
+              default:
+                throw new Error(`Unknown method ${operationConfig.method}`);
             }
-          },
-        },
+          }
+          const request = new Request(urlObj.toString(), requestInit);
+          const response = await fetchache(request, this.cache);
+          const responseText = await response.text();
+          let responseJson: any;
+          try {
+            responseJson = JSON.parse(responseText);
+          } catch (e) {
+            throw responseText;
+          }
+          const errorMessageField = this.config.errorMessageField || 'message';
+          function normalizeError(error: any): Error {
+            if (typeof error === 'object' && errorMessageField in error) {
+              const errorObj = new Error(error[errorMessageField]);
+              Object.assign(errorObj, error);
+              return errorObj;
+            } else {
+              return error;
+            }
+          }
+          const errors = responseJson.errors || responseJson._errors;
+          if (errors) {
+            throw new AggregateError(errors.map(normalizeError));
+          }
+          if (responseJson.error) {
+            throw normalizeError(responseJson.error);
+          }
+          return responseJson;
+        };
+      }
+      schemaComposer[destination].addFields({
+        [operationConfig.field]: fieldConfig,
       });
     };
 
     await Promise.all(typeNamedOperations.map(handleOperations));
     await Promise.all(unnamedOperations.map(handleOperations));
+
+    // graphql-compose doesn't add @defer and @stream to the schema
+    specifiedDirectives.forEach(directive => schemaComposer.addDirective(directive));
 
     const schema = schemaComposer.buildSchema();
     return {
@@ -286,7 +321,7 @@ export default class JsonSchemaHandler implements MeshHandler {
       if (cachedSample) {
         return cachedSample;
       }
-      const sample = await readFileOrUrlWithCache(samplePath, this.cache);
+      const sample = await readFileOrUrlWithCache(samplePath, this.cache, { cwd: this.baseDir });
       const schema = toJsonSchema(sample, {
         required: false,
         objects: {
@@ -300,7 +335,7 @@ export default class JsonSchemaHandler implements MeshHandler {
         },
       });
       if (schemaPath) {
-        writeJSON(schemaPath, schema);
+        writeJSON(schemaPath, schema).catch(e => `JSON Schema for ${samplePath} couldn't get cached: ${e.message}`);
       } else {
         const cachedSchema = {
           timestamp: Date.now(),

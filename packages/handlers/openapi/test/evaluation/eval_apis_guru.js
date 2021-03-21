@@ -47,7 +47,7 @@ async function checkOas(OASList) {
     errors: []
   }
   for (const oas of OASList) {
-    const name = oas.info.title
+    const name = oas.info?.title
     console.log(`Process "${name}" (${oas['x-file-path']})...`)
     try {
       const { report } = await openapiToGraphql.createGraphQLSchema(oas, {
@@ -314,7 +314,7 @@ function readFile(path) {
     if (/json$/.test(path)) {
       doc = JSON.parse(fs.readFileSync(path, 'utf8'))
     } else if (/yaml$|yml$/.test(path)) {
-      doc = YAML.safeLoad(fs.readFileSync(path, 'utf8'))
+      doc = YAML.load(fs.readFileSync(path, 'utf8'))
     }
     return doc
   } catch (e) {
@@ -333,7 +333,7 @@ const isValidOAS = oas => {
   return (
     typeof oas === 'object' &&
     typeof oas.info === 'object' &&
-    typeof oas.info.title === 'string' &&
+    typeof oas.info?.title === 'string' &&
     typeof oas.info.description === 'string' &&
     typeof oas.swagger === 'string' &&
     oas.swagger === '2.0'

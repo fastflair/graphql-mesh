@@ -1,12 +1,19 @@
 /* eslint-disable no-unused-expressions */
-import { GraphQLSchema, execute, DocumentNode, GraphQLError, subscribe } from 'graphql';
+import { GraphQLSchema, DocumentNode, GraphQLError, subscribe } from 'graphql';
 import { ExecuteMeshFn, GetMeshOptions, Requester, SubscribeMeshFn } from './types';
 import { MeshPubSub, KeyValueCache, RawSourceOutput, GraphQLOperation } from '@graphql-mesh/types';
 
 import { applyResolversHooksToSchema } from './resolvers-hooks';
 import { MESH_CONTEXT_SYMBOL, MESH_API_CONTEXT_SYMBOL } from './constants';
-import { applySchemaTransforms } from '@graphql-tools/utils';
-import { ensureDocumentNode, groupTransforms } from '@graphql-mesh/utils';
+import {
+  applySchemaTransforms,
+  ensureDocumentNode,
+  getInterpolatedStringFactory,
+  groupTransforms,
+  ResolverDataBasedFactory,
+} from '@graphql-mesh/utils';
+
+import { InMemoryLiveQueryStore } from '@n1ru4l/in-memory-live-query-store';
 
 export async function getMesh(
   options: GetMeshOptions
@@ -20,6 +27,7 @@ export async function getMesh(
   destroy: () => void;
   pubsub: MeshPubSub;
   cache: KeyValueCache;
+  liveQueryStore: InMemoryLiveQueryStore;
 }> {
   const rawSources: RawSourceOutput[] = [];
   const { pubsub, cache } = options;
@@ -34,12 +42,8 @@ export async function getMesh(
 
       const { wrapTransforms, noWrapTransforms } = groupTransforms(apiSource.transforms);
 
-      // If schema is going to be wrapped already we can use noWrapTransforms as wrapTransforms on source level
-      // The idea behind avoiding wrapping as much as possible is to decrease multiple rounds of graphqljs execution phase for performance
-      if (wrapTransforms.length === 0 && !source.executor && !source.subscriber) {
-        apiSchema = applySchemaTransforms(apiSchema, noWrapTransforms);
-      } else {
-        wrapTransforms.push(...noWrapTransforms);
+      if (noWrapTransforms?.length) {
+        apiSchema = applySchemaTransforms(apiSchema, { schema: apiSchema }, null, noWrapTransforms);
       }
 
       rawSources.push({
@@ -67,14 +71,38 @@ export async function getMesh(
 
   unifiedSchema = applyResolversHooksToSchema(unifiedSchema, pubsub);
 
+  const liveQueryStore = new InMemoryLiveQueryStore();
+
+  const liveQueryInvalidationFactoryMap = new Map<string, ResolverDataBasedFactory<string>[]>();
+
+  options.liveQueryInvalidations?.forEach(liveQueryInvalidation => {
+    const rawInvalidationPaths = liveQueryInvalidation.invalidate;
+    const factories = rawInvalidationPaths.map(rawInvalidationPath =>
+      getInterpolatedStringFactory(rawInvalidationPath)
+    );
+    liveQueryInvalidationFactoryMap.set(liveQueryInvalidation.field, factories);
+  });
+
+  pubsub.subscribe('resolverDone', ({ result, resolverData }) => {
+    const path = `${resolverData.info.parentType.name}.${resolverData.info.fieldName}`;
+    if (liveQueryInvalidationFactoryMap.has(path)) {
+      const invalidationPathFactories = liveQueryInvalidationFactoryMap.get(path);
+      const invalidationPaths = invalidationPathFactories.map(invalidationPathFactory =>
+        invalidationPathFactory({ ...resolverData, result })
+      );
+      liveQueryStore.invalidate(invalidationPaths);
+    }
+  });
+
   async function buildMeshContext<TAdditionalContext, TContext extends TAdditionalContext = any>(
-    initialContextValue?: TAdditionalContext
+    additionalContext: TAdditionalContext = {} as any
   ): Promise<TContext> {
-    const context: any = {
-      ...initialContextValue,
+    const context: TContext = Object.assign(additionalContext as any, {
       pubsub,
+      cache,
+      liveQueryStore,
       [MESH_CONTEXT_SYMBOL]: true,
-    };
+    });
 
     await Promise.all(
       rawSources.map(async rawSource => {
@@ -103,16 +131,18 @@ export async function getMesh(
     document: GraphQLOperation<TData, TVariables>,
     variables?: TVariables,
     context?: TContext,
-    rootValue?: TRootValue
+    rootValue?: TRootValue,
+    operationName?: string
   ) {
-    const contextValue = await buildMeshContext(context);
+    const contextValue = context && context[MESH_CONTEXT_SYMBOL] ? context : await buildMeshContext(context);
 
-    return execute({
+    return liveQueryStore.execute({
       document: ensureDocumentNode(document),
       contextValue,
       rootValue: rootValue || {},
       variableValues: variables || {},
       schema: unifiedSchema,
+      operationName,
     });
   }
 
@@ -120,9 +150,10 @@ export async function getMesh(
     document: GraphQLOperation<TData, TVariables>,
     variables?: TVariables,
     context?: TContext,
-    rootValue?: TRootValue
+    rootValue?: TRootValue,
+    operationName?: string
   ) {
-    const contextValue = await buildMeshContext(context);
+    const contextValue = context && context[MESH_CONTEXT_SYMBOL] ? context : await buildMeshContext(context);
 
     return subscribe({
       document: ensureDocumentNode(document),
@@ -130,25 +161,38 @@ export async function getMesh(
       rootValue: rootValue || {},
       variableValues: variables || {},
       schema: unifiedSchema,
+      operationName,
     });
   }
 
   const localRequester: Requester = async <Result, TVariables, TContext, TRootValue>(
     document: DocumentNode,
     variables: TVariables,
-    context: TContext
+    contextValue?: TContext,
+    rootValue?: TRootValue,
+    operationName?: string
   ) => {
-    const executionResult = await meshExecute<TVariables, TContext, TRootValue>(document, variables, context);
+    const executionResult = await meshExecute<TVariables, TContext, TRootValue>(
+      document,
+      variables,
+      contextValue,
+      rootValue,
+      operationName
+    );
 
-    if (executionResult.data && !executionResult.errors) {
-      return executionResult.data as Result;
+    if ('data' in executionResult) {
+      if (executionResult.data && !executionResult.errors) {
+        return executionResult.data as Result;
+      } else {
+        throw new GraphQLMeshSdkError(
+          executionResult.errors as ReadonlyArray<GraphQLError>,
+          document,
+          variables,
+          executionResult.data
+        );
+      }
     } else {
-      throw new GraphQLMeshSdkError(
-        executionResult.errors as ReadonlyArray<GraphQLError>,
-        document,
-        variables,
-        executionResult.data
-      );
+      throw new Error('Not implemented');
     }
   };
 
@@ -162,6 +206,7 @@ export async function getMesh(
     cache,
     pubsub,
     destroy: () => pubsub.publish('destroy', undefined),
+    liveQueryStore,
   };
 }
 

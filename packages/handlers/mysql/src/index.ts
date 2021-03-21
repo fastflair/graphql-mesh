@@ -14,7 +14,7 @@ import {
   GraphQLTimestamp,
   GraphQLTime,
 } from 'graphql-scalars';
-import { execute } from 'graphql';
+import { execute, specifiedDirectives } from 'graphql';
 import { loadFromModuleExportExpression } from '@graphql-mesh/utils';
 
 const SCALARS = {
@@ -101,20 +101,23 @@ type MysqlPromisifiedConnection = ThenArg<ReturnType<typeof getPromisifiedConnec
 type MysqlContext = { mysqlConnection: MysqlPromisifiedConnection };
 
 export default class MySQLHandler implements MeshHandler {
-  config: YamlConfig.MySQLHandler;
-  pubsub: MeshPubSub;
+  private config: YamlConfig.MySQLHandler;
+  private baseDir: string;
+  private pubsub: MeshPubSub;
 
-  constructor({ config, pubsub }: GetMeshSourceOptions<YamlConfig.MySQLHandler>) {
+  constructor({ config, baseDir, pubsub }: GetMeshSourceOptions<YamlConfig.MySQLHandler>) {
     this.config = config;
+    this.baseDir = baseDir;
     this.pubsub = pubsub;
   }
 
   async getMeshSource(): Promise<MeshSource> {
+    const { pool: configPool } = this.config;
     const schemaComposer = new SchemaComposer<MysqlContext>();
-    const pool: Pool = this.config.pool
-      ? typeof this.config.pool === 'string'
-        ? await loadFromModuleExportExpression(this.config.pool)
-        : this.config.pool
+    const pool: Pool = configPool
+      ? typeof configPool === 'string'
+        ? await loadFromModuleExportExpression(configPool, { cwd: this.baseDir })
+        : configPool
       : createPool(this.config);
     pool.on('connection', connection => {
       upgrade(connection);
@@ -248,8 +251,9 @@ export default class MySQLHandler implements MeshHandler {
         await Promise.all(
           Object.keys(tableForeigns).map(async foreignName => {
             const tableForeign = tableForeigns[foreignName];
+            const columnName = tableForeign.COLUMN_NAME;
             const foreignTableName = tableForeign.REFERENCED_TABLE_NAME;
-            const foreignColumnName = tableForeign.COLUMN_NAME;
+            const foreignColumnName = tableForeign.REFERENCED_COLUMN_NAME;
             const foreignTypeName = pascalCase(foreignTableName);
             tableTC.addFields({
               [foreignTableName]: {
@@ -275,7 +279,7 @@ export default class MySQLHandler implements MeshHandler {
                     fieldName => Object.keys(fieldMap[fieldName]).length === 0
                   );
                   const where = {
-                    [foreignColumnName]: root[foreignColumnName],
+                    [foreignColumnName]: root[columnName],
                     ...args?.where,
                   };
                   // Generate limit statement
@@ -386,6 +390,9 @@ export default class MySQLHandler implements MeshHandler {
       })
     );
     this.pubsub.subscribe('destroy', () => pool.end());
+
+    // graphql-compose doesn't add @defer and @stream to the schema
+    specifiedDirectives.forEach(directive => schemaComposer.addDirective(directive));
 
     const schema = schemaComposer.buildSchema();
 

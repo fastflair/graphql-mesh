@@ -19,7 +19,7 @@ export interface Config {
   /**
    * Additional type definitions, or type definitions overrides you wish to add to the schema mesh
    */
-  additionalTypeDefs?: string;
+  additionalTypeDefs?: any;
   /**
    * Additional resolvers, or resolvers overrides you wish to add to the schema mesh (Any of: String, AdditionalStitchingResolverObject, AdditionalSubscriptionObject)
    */
@@ -33,7 +33,15 @@ export interface Config {
    * PubSub Implementation (Any of: String, PubSubConfig)
    */
   pubsub?: string | PubSubConfig;
+  /**
+   * Live Query Invalidations
+   */
+  liveQueryInvalidations?: LiveQueryInvalidation[];
 }
+/**
+ * Configuration for `mesh serve` command.
+ * Those commands won't be available in programmatic usage.
+ */
 export interface ServeConfig {
   /**
    * Spawn multiple server instances as node clusters (default: `1`) (Any of: Int, Boolean)
@@ -44,18 +52,45 @@ export interface ServeConfig {
    */
   port?: number | string;
   /**
+   * The binding hostname (default: `localhost`)
+   */
+  hostname?: string;
+  /**
    * Provide an example query or queries for GraphQL Playground
+   * The value can be the file path, glob expression for the file paths or the SDL.
+   * (.js, .jsx, .graphql, .gql, .ts and .tsx files are supported.
+   * But TypeScript support is only available if `ts-node` is installed and `ts-node/register` is added under `require` parameter)
    */
   exampleQuery?: string;
   cors?: CorsConfig;
   /**
-   * Any of: WebhookHandler, ExpressHandler
+   * Express/Connect compatible handlers and middlewares extend GraphQL Mesh HTTP Server (Any of: WebhookHandler, ExpressHandler)
    */
   handlers?: (WebhookHandler | ExpressHandler)[];
+  /**
+   * Path to your static files you want to be served with GraphQL Mesh HTTP Server
+   */
   staticFiles?: string;
+  /**
+   * Show GraphiQL Playground
+   */
+  playground?: boolean;
+  /**
+   * Controls the maximum request body size. If this is a number, then the value specifies the number of bytes; if it is a string, the value is passed to the bytes library for parsing. Defaults to '100kb'. (Any of: Int, String)
+   */
+  maxRequestBodySize?: number | string;
+  upload?: UploadOptions;
+  sslCredentials?: HTTPSConfig;
+  /**
+   * Path to GraphQL Endpoint (default: /graphql)
+   */
+  endpoint?: string;
 }
+/**
+ * Configuration for CORS
+ */
 export interface CorsConfig {
-  origin?: string[];
+  origin?: any;
   allowedHeaders?: string[];
   exposedHeaders?: string[];
   credentials?: boolean;
@@ -64,17 +99,53 @@ export interface CorsConfig {
   optionsSuccessStatus?: number;
 }
 export interface WebhookHandler {
+  /**
+   * Path that remote API will ping
+   */
   path: string;
+  /**
+   * Name of the topic you want to pass incoming payload
+   */
   pubsubTopic: string;
+  /**
+   * Part of the object you want to pass (e.g. `data.messages`)
+   */
   payload?: string;
 }
 export interface ExpressHandler {
+  /**
+   * Path that the handler will control
+   */
   path: string;
+  /**
+   * Path of the handler's code
+   */
   handler: string;
   /**
-   * Allowed values: GET, POST, DELETE, PATCH
+   * HTTP Method that the handler will control (Allowed values: GET, POST, DELETE, PATCH)
    */
   method?: 'GET' | 'POST' | 'DELETE' | 'PATCH';
+}
+/**
+ * Configuration for GraphQL File Upload
+ */
+export interface UploadOptions {
+  /**
+   * Maximum File Size for GraphQL Upload (default: `100000000`)
+   */
+  maxFileSize?: number;
+  /**
+   * Maximum number of files for GraphQL Upload (default: `10`)
+   */
+  maxFiles?: number;
+}
+/**
+ * SSL Credentials for HTTPS Server
+ * If this is provided, Mesh will be served via HTTPS
+ */
+export interface HTTPSConfig {
+  key: string;
+  cert: string;
 }
 export interface Source {
   /**
@@ -114,15 +185,16 @@ export interface FhirHandler {
  */
 export interface GraphQLHandler {
   /**
-   * A url to your remote GraphQL endpoint
+   * A url or file path to your remote GraphQL endpoint.
+   * If you provide a path to a code file(js or ts),
+   * other options will be ignored and the schema exported from the file will be used directly.
    */
   endpoint: string;
   /**
    * JSON object representing the Headers to add to the runtime of the API calls only for schema introspection
+   * You can also provide `.js` or `.ts` file path that exports schemaHeaders as an object
    */
-  schemaHeaders?: {
-    [k: string]: any;
-  };
+  schemaHeaders?: any;
   /**
    * JSON object representing the Headers to add to the runtime of the API calls only for operation during runtime
    */
@@ -138,9 +210,9 @@ export interface GraphQLHandler {
    */
   method?: 'GET' | 'POST';
   /**
-   * Enable GraphQL Subscriptions using WebSocket
+   * Use Server Sent Events instead of WebSocket for Subscriptions
    */
-  enableSubscriptions?: boolean;
+  useSSEForSubscription?: boolean;
   /**
    * Path to a custom W3 Compatible Fetch Implementation
    */
@@ -158,6 +230,14 @@ export interface GraphQLHandler {
    * Cache Introspection (Any of: GraphQLIntrospectionCachingOptions, Boolean)
    */
   cacheIntrospection?: GraphQLIntrospectionCachingOptions | boolean;
+  /**
+   * Enable multipart/formdata in order to support file uploads
+   */
+  multipart?: boolean;
+  /**
+   * Batch requests
+   */
+  batch?: boolean;
 }
 export interface GraphQLIntrospectionCachingOptions {
   /**
@@ -180,7 +260,11 @@ export interface GrpcHandler {
   /**
    * gRPC Proto file that contains your protobuf schema (Any of: ProtoFilePath, String)
    */
-  protoFilePath: ProtoFilePath | string;
+  protoFilePath?: ProtoFilePath | string;
+  /**
+   * Use a binary-encoded or JSON file descriptor set file (Any of: ProtoFilePath, String)
+   */
+  descriptorSetFilePath?: ProtoFilePath | string;
   /**
    * Your base service name
    * Used for naming only
@@ -207,12 +291,17 @@ export interface GrpcHandler {
   metaData?: {
     [k: string]: any;
   };
+  /**
+   * Use gRPC reflection to automatically gather the connection
+   */
+  useReflection?: boolean;
 }
 export interface ProtoFilePath {
   file: string;
   load?: LoadOptions;
 }
 export interface LoadOptions {
+  defaults?: boolean;
   includeDirs?: string[];
 }
 /**
@@ -227,7 +316,7 @@ export interface GrpcCredentialsSsl {
  * Handler for JSON Schema specification. Source could be a local json file, or a url to it.
  */
 export interface JsonSchemaHandler {
-  baseUrl: string;
+  baseUrl?: string;
   operationHeaders?: {
     [k: string]: any;
   };
@@ -237,6 +326,10 @@ export interface JsonSchemaHandler {
   operations: JsonSchemaOperation[];
   disableTimestampScalar?: boolean;
   baseSchema?: any;
+  /**
+   * Field name of your custom error object (default: 'message')
+   */
+  errorMessageField?: string;
 }
 export interface JsonSchemaOperation {
   field: string;
@@ -250,7 +343,7 @@ export interface JsonSchemaOperation {
   /**
    * Allowed values: GET, DELETE, POST, PUT, PATCH
    */
-  method: 'GET' | 'DELETE' | 'POST' | 'PUT' | 'PATCH';
+  method?: 'GET' | 'DELETE' | 'POST' | 'PUT' | 'PATCH';
   requestSchema?: any;
   requestSample?: any;
   requestTypeName?: string;
@@ -557,7 +650,7 @@ export interface OpenapiHandler {
   /**
    * A pointer to your API source - could be a local file, remote file or url endpoint
    */
-  source: string;
+  source: any;
   /**
    * Format of the source file (Allowed values: json, yaml)
    */
@@ -597,6 +690,32 @@ export interface OpenapiHandler {
    * Auto-generate a 'limit' argument for all fields that return lists of objects, including ones produced by links
    */
   addLimitArgument?: boolean;
+  /**
+   * Set argument name for mutation payload to 'requestBody'. If false, name defaults to camelCased pathname
+   */
+  genericPayloadArgName?: boolean;
+  /**
+   * Allows to explicitly override the default operation (Query or Mutation) for any OAS operation
+   */
+  selectQueryOrMutationField?: SelectQueryOrMutationFieldConfig[];
+}
+export interface SelectQueryOrMutationFieldConfig {
+  /**
+   * OAS Title
+   */
+  title?: string;
+  /**
+   * Operation Path
+   */
+  path?: string;
+  /**
+   * Target Root Type for this operation (Allowed values: Query, Mutation)
+   */
+  type?: 'Query' | 'Mutation';
+  /**
+   * Which method is used for this operation
+   */
+  method?: string;
 }
 /**
  * Handler for Postgres database, based on `postgraphile`
@@ -611,11 +730,9 @@ export interface PostGraphileHandler {
    */
   schemaName?: string[];
   /**
-   * Connection Pool settings
+   * Connection Pool instance or settings or you can provide the path of a code file that exports any of those
    */
-  pool?: {
-    [k: string]: any;
-  };
+  pool?: any;
   /**
    * Extra Postgraphile Plugins to append
    */
@@ -636,6 +753,14 @@ export interface PostGraphileHandler {
    * Cache Introspection (Any of: GraphQLIntrospectionCachingOptions, Boolean)
    */
   cacheIntrospection?: GraphQLIntrospectionCachingOptions | boolean;
+  /**
+   * Enable GraphQL websocket transport support for subscriptions (default: true)
+   */
+  subscriptions?: boolean;
+  /**
+   * Enables live-query support via GraphQL subscriptions (sends updated payload any time nested collections/records change) (default: true)
+   */
+  live?: boolean;
 }
 /**
  * Handler for SOAP
@@ -647,6 +772,17 @@ export interface SoapHandler {
   wsdl: string;
   basicAuth?: SoapSecurityBasicAuthConfig;
   securityCert?: SoapSecurityCertificateConfig;
+  /**
+   * JSON object representing the Headers to add to the runtime of the API calls only for schema introspection
+   * You can also provide `.js` or `.ts` file path that exports schemaHeaders as an object
+   */
+  schemaHeaders?: any;
+  /**
+   * JSON object representing the Headers to add to the runtime of the API calls only for operation during runtime
+   */
+  operationHeaders?: {
+    [k: string]: any;
+  };
 }
 /**
  * Basic Authentication Configuration
@@ -755,15 +891,20 @@ export interface Transform {
    * Transformer to apply caching for your data sources
    */
   cache?: CacheTransformConfig[];
+  encapsulate?: EncapsulateTransformObject;
+  extend?: ExtendTransform;
   federation?: FederationTransform;
-  filterSchema?: string[];
+  /**
+   * Transformer to filter (white/black list) GraphQL types, fields and arguments (Any of: FilterSchemaTransform, Any)
+   */
+  filterSchema?: FilterSchemaTransform | any;
   mock?: MockingConfig;
   namingConvention?: NamingConventionTransformConfig;
   prefix?: PrefixTransformConfig;
   /**
-   * Transformer to apply rename of a GraphQL type
+   * Transformer to rename GraphQL types and fields (Any of: RenameTransform, Any)
    */
-  rename?: RenameTransformObject[];
+  rename?: RenameTransform | any;
   /**
    * Transformer to apply composition to resolvers
    */
@@ -817,6 +958,28 @@ export interface CacheEffectingOperationConfig {
    */
   matchKey?: string;
 }
+/**
+ * Transformer to apply encapsulation to the API source, by creating a field for it under the root query
+ */
+export interface EncapsulateTransformObject {
+  /**
+   * Optional, name to use for grouping under the root types. If not specific, the API name is used.
+   */
+  name?: string;
+  applyTo?: EncapsulateTransformApplyTo;
+}
+/**
+ * Allow you to choose which root operations you would like to apply. By default, it's applied to all root types.
+ */
+export interface EncapsulateTransformApplyTo {
+  query?: boolean;
+  mutation?: boolean;
+  subscription?: boolean;
+}
+export interface ExtendTransform {
+  typeDefs?: any;
+  resolvers?: any;
+}
 export interface FederationTransform {
   types?: FederationTransformType[];
 }
@@ -854,6 +1017,16 @@ export interface ResolveReferenceObject {
   };
   resultSelectionSet?: string;
   resultDepth?: number;
+}
+export interface FilterSchemaTransform {
+  /**
+   * Specify to apply filter-schema transforms to bare schema or by wrapping original schema (Allowed values: bare, wrap)
+   */
+  mode?: 'bare' | 'wrap';
+  /**
+   * Array of filter rules
+   */
+  filters: string[];
 }
 /**
  * Mock configuration for your source
@@ -973,15 +1146,35 @@ export interface PrefixTransformConfig {
    */
   includeRootOperations?: boolean;
 }
+export interface RenameTransform {
+  /**
+   * Specify to apply rename transforms to bare schema or by wrapping original schema (Allowed values: bare, wrap)
+   */
+  mode?: 'bare' | 'wrap';
+  /**
+   * Array of rename rules
+   */
+  renames: RenameTransformObject[];
+}
 export interface RenameTransformObject {
+  from: RenameConfig;
+  to: RenameConfig1;
   /**
-   * The GraphQL type to rename
+   * Use Regular Expression for type names
    */
-  from: string;
+  useRegExpForTypes?: boolean;
   /**
-   * The new name
+   * Use Regular Expression for field names
    */
-  to: string;
+  useRegExpForFields?: boolean;
+}
+export interface RenameConfig {
+  type?: string;
+  field?: string;
+}
+export interface RenameConfig1 {
+  type?: string;
+  field?: string;
 }
 export interface ResolversCompositionTransformObject {
   /**
@@ -1016,6 +1209,11 @@ export interface SnapshotTransformConfig {
    * Path to the directory of the generated snapshot files
    */
   outputDir: string;
+  /**
+   * Take snapshots by respecting the requested selection set.
+   * This might be needed for the handlers like Postgraphile or OData that rely on the incoming GraphQL operation.
+   */
+  respectSelectionSet?: boolean;
 }
 export interface AdditionalStitchingResolverObject {
   type: string;
@@ -1075,4 +1273,8 @@ export interface RedisConfig {
 export interface PubSubConfig {
   name: string;
   config?: any;
+}
+export interface LiveQueryInvalidation {
+  field: string;
+  invalidate: string[];
 }

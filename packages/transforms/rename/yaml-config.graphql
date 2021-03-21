@@ -1,17 +1,42 @@
 extend type Transform {
   """
-  Transformer to apply rename of a GraphQL type
+  Transformer to rename GraphQL types and fields
   """
-  rename: [RenameTransformObject!]
+  rename: RenameTransformConfig
+}
+
+union RenameTransformConfig = RenameTransform | Any
+
+type RenameTransform @md {
+  """
+  Specify to apply rename transforms to bare schema or by wrapping original schema
+  """
+  mode: RenameTransformMode
+  """
+  Array of rename rules
+  """
+  renames: [RenameTransformObject!]!
 }
 
 type RenameTransformObject @md {
+  from: RenameConfig!
+  to: RenameConfig!
   """
-  The GraphQL type to rename
+  Use Regular Expression for type names
   """
-  from: String!
+  useRegExpForTypes: Boolean
   """
-  The new name
+  Use Regular Expression for field names
   """
-  to: String!
+  useRegExpForFields: Boolean
+}
+
+type RenameConfig {
+  type: String
+  field: String
+}
+
+enum RenameTransformMode {
+  bare
+  wrap
 }

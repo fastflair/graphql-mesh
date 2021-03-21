@@ -189,7 +189,7 @@ export function preprocessOas<TSource, TContext, TArgs>(
         mitigationType: MitigationTypes.DUPLICATE_SECURITY_SCHEME,
         message: `Multiple OASs share security schemes with the same name '${propertyName}'`,
         mitigationAddendum:
-          `The security scheme from OAS ` + `'${currentSecurity[propertyName].oas.info.title}' will be ignored`,
+          `The security scheme from OAS ` + `'${currentSecurity[propertyName].oas.info?.title}' will be ignored`,
         data,
         log: preprocessingLog,
       });
@@ -217,7 +217,7 @@ export function preprocessOas<TSource, TContext, TArgs>(
           const operationString =
             oass.length === 1
               ? Oas3Tools.formatOperationString(rawMethod, path)
-              : Oas3Tools.formatOperationString(rawMethod, path, oas.info.title);
+              : Oas3Tools.formatOperationString(rawMethod, path, oas.info?.title);
 
           let httpMethod: Oas3Tools.HTTP_METHODS;
           try {
@@ -241,12 +241,12 @@ export function preprocessOas<TSource, TContext, TArgs>(
           // Option selectQueryOrMutationField can override operation type
           if (
             typeof options.selectQueryOrMutationField === 'object' &&
-            typeof options.selectQueryOrMutationField[oas.info.title] === 'object' &&
-            typeof options.selectQueryOrMutationField[oas.info.title][path] === 'object' &&
-            typeof options.selectQueryOrMutationField[oas.info.title][path][httpMethod] === 'number' // This is an TS enum, which is translated to have a integer value
+            typeof options.selectQueryOrMutationField[oas.info?.title] === 'object' &&
+            typeof options.selectQueryOrMutationField[oas.info?.title][path] === 'object' &&
+            typeof options.selectQueryOrMutationField[oas.info?.title][path][httpMethod] === 'number' // This is an TS enum, which is translated to have a integer value
           ) {
             operationType =
-              options.selectQueryOrMutationField[oas.info.title][path][httpMethod] === GraphQLOperationType.Mutation
+              options.selectQueryOrMutationField[oas.info?.title][path][httpMethod] === GraphQLOperationType.Mutation
                 ? GraphQLOperationType.Mutation
                 : GraphQLOperationType.Query;
           }
@@ -274,7 +274,7 @@ export function preprocessOas<TSource, TContext, TArgs>(
               handleWarning({
                 mitigationType: MitigationTypes.DUPLICATE_OPERATIONID,
                 message: `Multiple OASs share operations with the same operationId '${operationData.operationId}'`,
-                mitigationAddendum: `The operation from the OAS '${operationData.oas.info.title}' will be ignored`,
+                mitigationAddendum: `The operation from the OAS '${operationData.oas.info?.title}' will be ignored`,
                 data,
                 log: preprocessingLog,
               });
@@ -319,7 +319,7 @@ export function preprocessOas<TSource, TContext, TArgs>(
                   const callbackOperationString =
                     oass.length === 1
                       ? Oas3Tools.formatOperationString(httpMethod, callbackName)
-                      : Oas3Tools.formatOperationString(httpMethod, callbackName, oas.info.title);
+                      : Oas3Tools.formatOperationString(httpMethod, callbackName, oas.info?.title);
 
                   let callbackHttpMethod: Oas3Tools.HTTP_METHODS;
 
@@ -367,7 +367,7 @@ export function preprocessOas<TSource, TContext, TArgs>(
                       handleWarning({
                         mitigationType: MitigationTypes.DUPLICATE_OPERATIONID,
                         message: `Multiple OASs share callback operations with the same operationId '${callbackOperation.operationId}'`,
-                        mitigationAddendum: `The callback operation from the OAS '${operationData.oas.info.title}' will be ignored`,
+                        mitigationAddendum: `The callback operation from the OAS '${operationData.oas.info?.title}' will be ignored`,
                         data,
                         log: preprocessingLog,
                       });
@@ -441,7 +441,7 @@ function getProcessedSecuritySchemes<TSource, TContext, TArgs>(
       case 'apiKey':
         description = `API key credentials for the security protocol '${key}'`;
         if (data.oass.length > 1) {
-          description += ` in ${oas.info.title}`;
+          description += ` in ${oas.info?.title}`;
         }
 
         parameters = {
@@ -494,7 +494,7 @@ function getProcessedSecuritySchemes<TSource, TContext, TArgs>(
               message:
                 `Currently unsupported HTTP authentication protocol ` +
                 `type 'http' and scheme '${protocol.scheme}' in OAS ` +
-                `'${oas.info.title}'`,
+                `'${oas.info?.title}'`,
               data,
               log: preprocessingLog,
             });
@@ -506,7 +506,7 @@ function getProcessedSecuritySchemes<TSource, TContext, TArgs>(
         handleWarning({
           mitigationType: MitigationTypes.UNSUPPORTED_HTTP_SECURITY_SCHEME,
           message:
-            `Currently unsupported HTTP authentication protocol ` + `type 'openIdConnect' in OAS '${oas.info.title}'`,
+            `Currently unsupported HTTP authentication protocol ` + `type 'openIdConnect' in OAS '${oas.info?.title}'`,
           data,
           log: preprocessingLog,
         });
@@ -517,7 +517,7 @@ function getProcessedSecuritySchemes<TSource, TContext, TArgs>(
         handleWarning({
           mitigationType: MitigationTypes.OAUTH_SECURITY_SCHEME,
           message:
-            `OAuth security scheme found in OAS '${oas.info.title}'. ` +
+            `OAuth security scheme found in OAS '${oas.info?.title}'. ` +
             `OAuth support is provided using the 'tokenJSONpath' option`,
           data,
           log: preprocessingLog,
@@ -529,7 +529,7 @@ function getProcessedSecuritySchemes<TSource, TContext, TArgs>(
       default:
         handleWarning({
           mitigationType: MitigationTypes.UNSUPPORTED_HTTP_SECURITY_SCHEME,
-          message: `Unsupported HTTP authentication protocol` + `type '${protocol.type}' in OAS '${oas.info.title}'`,
+          message: `Unsupported HTTP authentication protocol` + `type '${protocol.type}' in OAS '${oas.info?.title}'`,
           data,
           log: preprocessingLog,
         });
@@ -647,15 +647,14 @@ export function createDataDef<TSource, TContext, TArgs>(
       return existingDataDef;
     } else {
       // Else, define a new name, store the def, and return it
-      const name = getSchemaName(names, data.usedTypeNames);
+      const usedNames = [...data.usedTypeNames, ...Object.keys(data.saneMap)];
+      const caseStyle = data.options.simpleNames ? Oas3Tools.CaseStyle.simple : Oas3Tools.CaseStyle.PascalCase;
+      const name = getSchemaName(names, usedNames as string[], caseStyle);
 
       // Store and sanitize the name
-      const saneName = !data.options.simpleNames
-        ? Oas3Tools.sanitize(name, Oas3Tools.CaseStyle.PascalCase)
-        : Oas3Tools.capitalize(Oas3Tools.sanitize(name, Oas3Tools.CaseStyle.simple));
+      let saneName = Oas3Tools.sanitize(name, caseStyle);
+      saneName = Oas3Tools.storeSaneName(saneName, name, data.saneMap);
       const saneInputName = Oas3Tools.capitalize(saneName + 'Input');
-
-      Oas3Tools.storeSaneName(saneName, name, data.saneMap);
 
       /**
        * TODO: is there a better way of copying the schema object?
@@ -869,7 +868,7 @@ function getPreferredName(names: Oas3Tools.SchemaNames): string {
  * Determines name to use for schema from previously determined schemaNames and
  * considering not reusing existing names.
  */
-function getSchemaName(names: Oas3Tools.SchemaNames, usedNames: string[]): string {
+function getSchemaName(names: Oas3Tools.SchemaNames, usedNames: string[], caseStyle: Oas3Tools.CaseStyle): string {
   if (Object.keys(names).length === 1 && typeof names.preferred === 'string') {
     throw new Error(`Cannot create data definition without name(s), excluding the preferred name.`);
   }
@@ -878,7 +877,7 @@ function getSchemaName(names: Oas3Tools.SchemaNames, usedNames: string[]): strin
 
   // CASE: name from reference
   if (typeof names.fromRef === 'string') {
-    const saneName = Oas3Tools.sanitize(names.fromRef, Oas3Tools.CaseStyle.PascalCase);
+    const saneName = Oas3Tools.sanitize(names.fromRef, caseStyle);
     if (!usedNames.includes(saneName)) {
       schemaName = names.fromRef;
     }
@@ -886,7 +885,7 @@ function getSchemaName(names: Oas3Tools.SchemaNames, usedNames: string[]): strin
 
   // CASE: name from schema (i.e., "title" property in schema)
   if (!schemaName && typeof names.fromSchema === 'string') {
-    const saneName = Oas3Tools.sanitize(names.fromSchema, Oas3Tools.CaseStyle.PascalCase);
+    const saneName = Oas3Tools.sanitize(names.fromSchema, caseStyle);
     if (!usedNames.includes(saneName)) {
       schemaName = names.fromSchema;
     }
@@ -894,7 +893,7 @@ function getSchemaName(names: Oas3Tools.SchemaNames, usedNames: string[]): strin
 
   // CASE: name from path
   if (!schemaName && typeof names.fromPath === 'string') {
-    const saneName = Oas3Tools.sanitize(names.fromPath, Oas3Tools.CaseStyle.PascalCase);
+    const saneName = Oas3Tools.sanitize(names.fromPath, caseStyle);
     if (!usedNames.includes(saneName)) {
       schemaName = names.fromPath;
     }
@@ -910,7 +909,7 @@ function getSchemaName(names: Oas3Tools.SchemaNames, usedNames: string[]): strin
         : typeof names.fromPath === 'string'
         ? names.fromPath
         : 'PlaceholderName',
-      Oas3Tools.CaseStyle.PascalCase
+      caseStyle
     );
   }
 

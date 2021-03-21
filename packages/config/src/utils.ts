@@ -10,6 +10,8 @@ import { stringInterpolator } from '@graphql-mesh/utils';
 import { mergeResolvers } from '@graphql-tools/merge';
 import { PubSub, withFilter } from 'graphql-subscriptions';
 import { EventEmitter } from 'events';
+import { CodeFileLoader } from '@graphql-tools/code-file-loader';
+import StitchingMerger from '@graphql-mesh/merger-stitching';
 
 export async function getPackage<T>(name: string, type: string, importFn: ImportFn): Promise<T> {
   const casedName = paramCase(name);
@@ -34,7 +36,10 @@ export async function getPackage<T>(name: string, type: string, importFn: Import
 
       return (exported.default || exported.parser || exported) as T;
     } catch (err) {
-      if (err.message.indexOf(`Cannot find module '${moduleName}'`) === -1) {
+      if (
+        !err.message.includes(`Cannot find module '${moduleName}'`) &&
+        !err.message.includes(`Could not locate module`)
+      ) {
         throw new Error(`Unable to load ${type} matching ${name}: ${err.message}`);
       }
     }
@@ -53,7 +58,7 @@ export async function resolveAdditionalTypeDefs(baseDir: string, additionalTypeD
   if (additionalTypeDefs) {
     const sources = await loadTypedefs(additionalTypeDefs, {
       cwd: baseDir,
-      loaders: [new GraphQLFileLoader()],
+      loaders: [new CodeFileLoader(), new GraphQLFileLoader()],
     });
     return sources.map(source => source.document || parse(source.rawSDL || printSchemaWithDirectives(source.schema)));
   }
@@ -203,6 +208,5 @@ export async function resolveMerger(mergerConfig: YamlConfig.Config['merger'], i
     const pkg = await getPackage<any>(mergerConfig, 'merger', importFn);
     return pkg.default || pkg;
   }
-  const StitchingMerger = await import('@graphql-mesh/merger-stitching').then(m => m.default);
   return StitchingMerger;
 }

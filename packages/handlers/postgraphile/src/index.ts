@@ -13,19 +13,23 @@ import { getPostGraphileBuilder } from 'postgraphile-core';
 import { Pool } from 'pg';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { readJSON, unlink } from 'fs-extra';
-import { loadFromModuleExportExpression, readFileOrUrlWithCache } from '@graphql-mesh/utils';
+import { promises as fsPromises } from 'fs';
+import { loadFromModuleExportExpression, readFileOrUrlWithCache, readJSON } from '@graphql-mesh/utils';
+
+const { unlink } = fsPromises || {};
 
 export default class PostGraphileHandler implements MeshHandler {
   private name: string;
-  private cache: KeyValueCache;
   private config: YamlConfig.PostGraphileHandler;
+  private baseDir: string;
+  private cache: KeyValueCache;
   private pubsub: MeshPubSub;
 
-  constructor({ name, cache, config, pubsub }: GetMeshSourceOptions<YamlConfig.PostGraphileHandler>) {
+  constructor({ name, config, baseDir, cache, pubsub }: GetMeshSourceOptions<YamlConfig.PostGraphileHandler>) {
     this.name = name;
-    this.cache = cache;
     this.config = config;
+    this.baseDir = baseDir;
+    this.cache = cache;
     this.pubsub = pubsub;
   }
 
@@ -54,10 +58,18 @@ export default class PostGraphileHandler implements MeshHandler {
   }
 
   async getMeshSource(): Promise<MeshSource> {
-    const pgPool = new Pool({
-      connectionString: this.config.connectionString,
-      ...this.config?.pool,
-    });
+    let pgPool: Pool;
+
+    if (typeof this.config?.pool === 'string') {
+      pgPool = await loadFromModuleExportExpression<any>(this.config.pool, { cwd: this.baseDir });
+    }
+
+    if (!pgPool || !('connect' in pgPool)) {
+      pgPool = new Pool({
+        connectionString: this.config.connectionString,
+        ...this.config?.pool,
+      });
+    }
 
     this.pubsub.subscribe('destroy', () => pgPool.end());
 
@@ -69,7 +81,9 @@ export default class PostGraphileHandler implements MeshHandler {
     if (this.config.cacheIntrospection) {
       if (typeof this.config.cacheIntrospection === 'object' && this.config.cacheIntrospection.path) {
         cacheIntrospectionFile = this.config.cacheIntrospection.path;
-        cachedIntrospection = await readFileOrUrlWithCache(this.config.cacheIntrospection.path, this.cache);
+        cachedIntrospection = await readFileOrUrlWithCache(this.config.cacheIntrospection.path, this.cache, {
+          cwd: this.baseDir,
+        });
         ifTmpFileUsed = true;
       } else {
         cachedIntrospection = await this.cache.get(cacheKey);
@@ -79,19 +93,23 @@ export default class PostGraphileHandler implements MeshHandler {
     let writeCache: () => Promise<void>;
 
     const appendPlugins = await Promise.all<Plugin>(
-      (this.config.appendPlugins || []).map(pluginName => loadFromModuleExportExpression<any>(pluginName))
+      (this.config.appendPlugins || []).map(pluginName =>
+        loadFromModuleExportExpression<any>(pluginName, { cwd: this.baseDir })
+      )
     );
     const skipPlugins = await Promise.all<Plugin>(
-      (this.config.skipPlugins || []).map(pluginName => loadFromModuleExportExpression<any>(pluginName))
+      (this.config.skipPlugins || []).map(pluginName =>
+        loadFromModuleExportExpression<any>(pluginName, { cwd: this.baseDir })
+      )
     );
-    const options = await loadFromModuleExportExpression<any>(this.config.options);
+    const options = await loadFromModuleExportExpression<any>(this.config.options, { cwd: this.baseDir });
 
     const builder = await getPostGraphileBuilder(pgPool, this.config.schemaName || 'public', {
       dynamicJson: true,
-      subscriptions: true,
-      live: true,
+      subscriptions: 'subscriptions' in this.config ? this.config.subscriptions : true,
+      live: 'live' in this.config ? this.config.live : true,
       readCache: cachedIntrospection,
-      writeCache: cacheIntrospectionFile,
+      writeCache: !cachedIntrospection && cacheIntrospectionFile,
       setWriteCacheCallback: fn => {
         writeCache = fn;
       },

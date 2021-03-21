@@ -1,7 +1,7 @@
 import { KeyValueCache } from '@graphql-mesh/types';
 import { readFileOrUrlWithCache } from '@graphql-mesh/utils';
 import { ClientReadableStream, ClientUnaryCall, Metadata, MetadataValue } from '@grpc/grpc-js';
-import { pathExistsSync } from 'fs-extra';
+import { existsSync } from 'fs';
 import { GraphQLEnumTypeConfig } from 'graphql';
 import { InputTypeComposer, ObjectTypeComposer, SchemaComposer } from 'graphql-compose';
 import { get } from 'lodash';
@@ -33,7 +33,7 @@ export function addIncludePathResolver(root: Root, includePaths: string[]): void
     }
     for (const directory of includePaths) {
       const fullPath: string = join(directory, target);
-      if (pathExistsSync(fullPath)) {
+      if (existsSync(fullPath)) {
         return fullPath;
       }
     }
@@ -72,10 +72,11 @@ export function addMetaDataToCall(
   return call(input);
 }
 
-export async function getBuffer(path: string, cache: KeyValueCache): Promise<Buffer> {
+export async function getBuffer(path: string, cache: KeyValueCache, cwd: string): Promise<Buffer> {
   if (path) {
     const result = await readFileOrUrlWithCache<string>(path, cache, {
       allowUnknownExtensions: true,
+      cwd,
     });
     return Buffer.from(result);
   }
@@ -91,7 +92,11 @@ export function getTypeName(
   if (isScalarType(typePath)) {
     return getGraphQLScalar(typePath);
   }
-  let baseTypeName = pascalCase(toSnakeCase(typePath.replace(packageName + '.', '')));
+  let baseTypeName = pascalCase(typePath);
+  const packageNamePrefix = pascalCase(packageName);
+  if (baseTypeName.startsWith(packageNamePrefix)) {
+    baseTypeName = baseTypeName.replace(packageNamePrefix, '');
+  }
   if (isInput && !schemaComposer.isEnumType(baseTypeName)) {
     baseTypeName += 'Input';
   }

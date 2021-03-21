@@ -1,5 +1,437 @@
 # openapi-youtrack
 
+## 0.5.86
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.26.2
+
+## 0.5.85
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.26.1
+
+## 0.5.84
+
+### Patch Changes
+
+- Updated dependencies [f3731f584]
+  - @graphql-mesh/openapi@0.13.3
+
+## 0.5.83
+
+### Patch Changes
+
+- Updated dependencies [e1eca62e]
+  - @graphql-mesh/openapi@0.13.2
+
+## 0.5.82
+
+### Patch Changes
+
+- Updated dependencies [7efbf045]
+- Updated dependencies [191a663a]
+  - @graphql-mesh/cli@0.26.0
+  - @graphql-mesh/openapi@0.13.1
+  - @graphql-mesh/transform-resolvers-composition@0.8.1
+
+## 0.5.81
+
+### Patch Changes
+
+- Updated dependencies [b9ca0c30]
+  - @graphql-mesh/openapi@0.13.0
+  - @graphql-mesh/transform-resolvers-composition@0.8.0
+  - @graphql-mesh/cli@0.25.3
+
+## 0.5.80
+
+### Patch Changes
+
+- Updated dependencies [cf58cd5c]
+  - @graphql-mesh/cli@0.25.2
+
+## 0.5.79
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.25.1
+- @graphql-mesh/openapi@0.12.18
+- @graphql-mesh/transform-resolvers-composition@0.7.32
+
+## 0.5.78
+
+### Patch Changes
+
+- Updated dependencies [b52859c6]
+  - @graphql-mesh/cli@0.25.0
+
+## 0.5.77
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.12.17
+- @graphql-mesh/transform-resolvers-composition@0.7.31
+- @graphql-mesh/cli@0.24.1
+
+## 0.5.76
+
+### Patch Changes
+
+- Updated dependencies [76051dd7]
+  - @graphql-mesh/cli@0.24.0
+  - @graphql-mesh/openapi@0.12.16
+  - @graphql-mesh/transform-resolvers-composition@0.7.30
+
+## 0.5.75
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.12.15
+- @graphql-mesh/transform-resolvers-composition@0.7.29
+- @graphql-mesh/cli@0.23.4
+
+## 0.5.74
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.12.14
+- @graphql-mesh/transform-resolvers-composition@0.7.28
+- @graphql-mesh/cli@0.23.3
+
+## 0.5.73
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.12.13
+- @graphql-mesh/transform-resolvers-composition@0.7.27
+- @graphql-mesh/cli@0.23.2
+
+## 0.5.72
+
+### Patch Changes
+
+- Updated dependencies [f9985ac8]
+  - @graphql-mesh/cli@0.23.1
+
+## 0.5.71
+
+### Patch Changes
+
+- Updated dependencies [77327988]
+  - @graphql-mesh/cli@0.23.0
+  - @graphql-mesh/openapi@0.12.12
+  - @graphql-mesh/transform-resolvers-composition@0.7.26
+
+## 0.5.70
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.12.11
+- @graphql-mesh/transform-resolvers-composition@0.7.25
+- @graphql-mesh/cli@0.22.1
+
+## 0.5.69
+
+### Patch Changes
+
+- Updated dependencies [970c43e2]
+- Updated dependencies [2cfa421a]
+  - @graphql-mesh/cli@0.22.0
+
+## 0.5.68
+
+### Patch Changes
+
+- Updated dependencies [ea3a183b]
+  - @graphql-mesh/cli@0.21.0
+
+## 0.5.67
+
+### Patch Changes
+
+- Updated dependencies [9354aeba]
+  - @graphql-mesh/openapi@0.12.10
+
+## 0.5.66
+
+### Patch Changes
+
+- Updated dependencies [938cca26]
+  - @graphql-mesh/openapi@0.12.9
+  - @graphql-mesh/transform-resolvers-composition@0.7.24
+  - @graphql-mesh/cli@0.20.2
+
+## 0.5.65
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.12.8
+- @graphql-mesh/transform-resolvers-composition@0.7.23
+- @graphql-mesh/cli@0.20.1
+
+## 0.5.64
+
+### Patch Changes
+
+- Updated dependencies [a02d86c3]
+- Updated dependencies [a02d86c3]
+- Updated dependencies [a02d86c3]
+- Updated dependencies [a02d86c3]
+  - @graphql-mesh/cli@0.20.0
+  - @graphql-mesh/openapi@0.12.7
+  - @graphql-mesh/transform-resolvers-composition@0.7.22
+
+## 0.5.63
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.19.2
+- @graphql-mesh/openapi@0.12.6
+- @graphql-mesh/transform-resolvers-composition@0.7.21
+
+## 0.5.62
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.19.1
+
+## 0.5.61
+
+### Patch Changes
+
+- Updated dependencies [63e12ef3]
+  - @graphql-mesh/cli@0.19.0
+
+## 0.5.60
+
+### Patch Changes
+
+- Updated dependencies [8e8848e1]
+  - @graphql-mesh/cli@0.18.0
+  - @graphql-mesh/openapi@0.12.5
+  - @graphql-mesh/transform-resolvers-composition@0.7.20
+
+## 0.5.59
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.17.1
+- @graphql-mesh/openapi@0.12.4
+- @graphql-mesh/transform-resolvers-composition@0.7.19
+
+## 0.5.58
+
+### Patch Changes
+
+- Updated dependencies [e8994875]
+  - @graphql-mesh/cli@0.17.0
+  - @graphql-mesh/openapi@0.12.3
+  - @graphql-mesh/transform-resolvers-composition@0.7.18
+
+## 0.5.57
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.16.3
+- @graphql-mesh/openapi@0.12.2
+- @graphql-mesh/transform-resolvers-composition@0.7.17
+
+## 0.5.56
+
+### Patch Changes
+
+- Updated dependencies [c767df01]
+- Updated dependencies [b3d7ecbf]
+  - @graphql-mesh/cli@0.16.2
+  - @graphql-mesh/openapi@0.12.1
+  - @graphql-mesh/transform-resolvers-composition@0.7.16
+
+## 0.5.55
+
+### Patch Changes
+
+- Updated dependencies [a22fc6f3]
+  - @graphql-mesh/openapi@0.12.0
+  - @graphql-mesh/transform-resolvers-composition@0.7.15
+  - @graphql-mesh/cli@0.16.1
+
+## 0.5.54
+
+### Patch Changes
+
+- Updated dependencies [c1de3e43]
+  - @graphql-mesh/cli@0.16.0
+  - @graphql-mesh/openapi@0.11.8
+  - @graphql-mesh/transform-resolvers-composition@0.7.14
+
+## 0.5.53
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.11.7
+- @graphql-mesh/transform-resolvers-composition@0.7.13
+- @graphql-mesh/cli@0.15.7
+
+## 0.5.52
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.11.6
+- @graphql-mesh/transform-resolvers-composition@0.7.12
+- @graphql-mesh/cli@0.15.6
+
+## 0.5.51
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.15.5
+- @graphql-mesh/openapi@0.11.5
+- @graphql-mesh/transform-resolvers-composition@0.7.11
+
+## 0.5.50
+
+### Patch Changes
+
+- Updated dependencies [0b08b2a6]
+  - @graphql-mesh/cli@0.15.4
+
+## 0.5.49
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.11.4
+- @graphql-mesh/transform-resolvers-composition@0.7.10
+- @graphql-mesh/cli@0.15.3
+
+## 0.5.48
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.11.3
+- @graphql-mesh/transform-resolvers-composition@0.7.9
+- @graphql-mesh/cli@0.15.2
+
+## 0.5.47
+
+### Patch Changes
+
+- Updated dependencies [a7dcd2d9]
+  - @graphql-mesh/cli@0.15.1
+
+## 0.5.46
+
+### Patch Changes
+
+- Updated dependencies [bccbb9ca]
+  - @graphql-mesh/cli@0.15.0
+
+## 0.5.45
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.14.1
+- @graphql-mesh/openapi@0.11.2
+- @graphql-mesh/transform-resolvers-composition@0.7.8
+
+## 0.5.44
+
+### Patch Changes
+
+- Updated dependencies [438b5250]
+- Updated dependencies [1ba078b8]
+  - @graphql-mesh/cli@0.14.0
+  - @graphql-mesh/openapi@0.11.1
+  - @graphql-mesh/transform-resolvers-composition@0.7.7
+
+## 0.5.43
+
+### Patch Changes
+
+- Updated dependencies [c8389f64]
+  - @graphql-mesh/cli@0.13.0
+
+## 0.5.42
+
+### Patch Changes
+
+- Updated dependencies [59d77fb8]
+  - @graphql-mesh/openapi@0.11.0
+  - @graphql-mesh/transform-resolvers-composition@0.7.6
+  - @graphql-mesh/cli@0.12.6
+
+## 0.5.41
+
+### Patch Changes
+
+- Updated dependencies [0031c62f]
+  - @graphql-mesh/openapi@0.10.14
+
+## 0.5.40
+
+### Patch Changes
+
+- Updated dependencies [98334b6e]
+  - @graphql-mesh/openapi@0.10.13
+
+## 0.5.39
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.12.5
+- @graphql-mesh/openapi@0.10.12
+- @graphql-mesh/transform-resolvers-composition@0.7.5
+
+## 0.5.38
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.10.11
+- @graphql-mesh/transform-resolvers-composition@0.7.4
+- @graphql-mesh/cli@0.12.4
+
+## 0.5.37
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.10.10
+- @graphql-mesh/transform-resolvers-composition@0.7.3
+- @graphql-mesh/cli@0.12.3
+
+## 0.5.36
+
+### Patch Changes
+
+- Updated dependencies [1f0b2f1f]
+  - @graphql-mesh/cli@0.12.2
+  - @graphql-mesh/openapi@0.10.9
+  - @graphql-mesh/transform-resolvers-composition@0.7.2
+
+## 0.5.35
+
+### Patch Changes
+
+- @graphql-mesh/openapi@0.10.8
+- @graphql-mesh/transform-resolvers-composition@0.7.1
+- @graphql-mesh/cli@0.12.1
+
+## 0.5.34
+
+### Patch Changes
+
+- Updated dependencies [2d14fcc3]
+- Updated dependencies [2d14fcc3]
+  - @graphql-mesh/cli@0.12.0
+  - @graphql-mesh/transform-resolvers-composition@0.7.0
+  - @graphql-mesh/openapi@0.10.7
+
+## 0.5.33
+
+### Patch Changes
+
+- @graphql-mesh/cli@0.11.14
+
 ## 0.5.32
 
 ### Patch Changes

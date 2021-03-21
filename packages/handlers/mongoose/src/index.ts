@@ -4,6 +4,7 @@ import { GetMeshSourceOptions, MeshPubSub, MeshHandler, MeshSource, YamlConfig }
 import { camelCase } from 'camel-case';
 import mongoose from 'mongoose';
 import { loadFromModuleExportExpression } from '@graphql-mesh/utils';
+import { specifiedDirectives } from 'graphql';
 
 const modelQueryOperations = ['findById', 'findByIds', 'findOne', 'findMany', 'count', 'connection', 'pagination'];
 
@@ -20,19 +21,23 @@ const modelMutationOperations = [
 
 export default class MongooseHandler implements MeshHandler {
   private config: YamlConfig.MongooseHandler;
+  private baseDir: string;
   private pubsub: MeshPubSub;
 
-  constructor({ config, pubsub }: GetMeshSourceOptions<YamlConfig.MongooseHandler>) {
+  constructor({ config, baseDir, pubsub }: GetMeshSourceOptions<YamlConfig.MongooseHandler>) {
     this.config = config;
+    this.baseDir = baseDir;
     this.pubsub = pubsub;
   }
 
   async getMeshSource(): Promise<MeshSource> {
     if (this.config.connectionString) {
-      await mongoose.connect(this.config.connectionString, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      mongoose
+        .connect(this.config.connectionString, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        .catch(e => console.error(e));
 
       this.pubsub.subscribe('destroy', () => mongoose.disconnect());
     }
@@ -42,7 +47,13 @@ export default class MongooseHandler implements MeshHandler {
     await Promise.all([
       Promise.all(
         this.config.models?.map(async modelConfig => {
-          const model = await loadFromModuleExportExpression<any>(modelConfig.path, modelConfig.name);
+          const model = await loadFromModuleExportExpression<any>(modelConfig.path, {
+            defaultExportName: modelConfig.name,
+            cwd: this.baseDir,
+          });
+          if (!model) {
+            throw new Error(`Model ${modelConfig.name} cannot be imported ${modelConfig.path}!`);
+          }
           const modelTC = composeWithMongoose(model, modelConfig.options as any);
           await Promise.all([
             Promise.all(
@@ -60,14 +71,14 @@ export default class MongooseHandler implements MeshHandler {
               )
             ),
           ]);
-        })
+        }) || []
       ),
       Promise.all(
-        this.config.discriminators.map(async discriminatorConfig => {
-          const discriminator = await loadFromModuleExportExpression<any>(
-            discriminatorConfig.path,
-            discriminatorConfig.name
-          );
+        this.config.discriminators?.map(async discriminatorConfig => {
+          const discriminator = await loadFromModuleExportExpression<any>(discriminatorConfig.path, {
+            defaultExportName: discriminatorConfig.name,
+            cwd: this.baseDir,
+          });
           const discriminatorTC = composeWithMongooseDiscriminators(discriminator, discriminatorConfig.options as any);
           await Promise.all([
             Promise.all(
@@ -89,9 +100,12 @@ export default class MongooseHandler implements MeshHandler {
               )
             ),
           ]);
-        })
+        }) || []
       ),
     ]);
+
+    // graphql-compose doesn't add @defer and @stream to the schema
+    specifiedDirectives.forEach(directive => schemaComposer.addDirective(directive));
 
     const schema = schemaComposer.buildSchema();
 

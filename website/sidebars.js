@@ -5,7 +5,7 @@ module.exports = {
       'getting-started/installation',
       'getting-started/basic-example',
       'getting-started/mesh-transforms',
-      'getting-started/multiple-apis'
+      'getting-started/multiple-apis',
     ],
     'Input Handlers': [
       'handlers/available-handlers',
@@ -20,27 +20,30 @@ module.exports = {
       'handlers/thrift',
       'handlers/tuql',
       'handlers/mysql',
-      'handlers/neo4j'
+      'handlers/neo4j',
     ],
     Transforms: [
       'transforms/rename',
       'transforms/prefix',
+      'transforms/encapsulate',
       'transforms/cache',
       'transforms/snapshot',
       'transforms/mock',
       'transforms/resolvers-composition',
       'transforms/federation',
       'transforms/filter-schema',
-      'transforms/naming-convention'
+      'transforms/naming-convention',
+      'transforms/extend',
     ],
-    // 'API Reference': ['api/cli', 'api/runtime'],
     Recipes: [
-      'recipes/typescript', 
-      'recipes/as-sdk', 
+      'recipes/typescript',
+      'recipes/as-sdk',
       'recipes/as-gateway',
       'recipes/federation',
-      'recipes/subscriptions-webhooks'
+      'recipes/subscriptions-webhooks',
+      'recipes/live-queries'
     ],
+    "API Reference": require('./api-sidebar.json')
     // 'Extend Your Mesh': ['extend/custom-handler', 'extend/custom-transform']
-  }
+  },
 };

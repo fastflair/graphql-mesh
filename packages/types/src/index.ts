@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-misused-new */
-import { IResolvers, Transform } from '@graphql-tools/utils';
+import { IResolvers } from '@graphql-tools/utils';
 import { GraphQLSchema, GraphQLResolveInfo, DocumentNode } from 'graphql';
 import * as YamlConfig from './config';
 import { KeyValueCache, KeyValueCacheSetOptions } from 'fetchache';
-import { Executor, Subscriber } from '@graphql-tools/delegate';
+import { Executor, Subscriber, Transform } from '@graphql-tools/delegate';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 
 export { YamlConfig };
@@ -23,9 +23,10 @@ export type MeshSource<ContextType = any, InitialContext = any> = {
 
 export type GetMeshSourceOptions<THandlerConfig> = {
   name: string;
-  pubsub: MeshPubSub;
   config: THandlerConfig;
+  baseDir?: string;
   cache: KeyValueCache;
+  pubsub: MeshPubSub;
 };
 
 // Handlers
@@ -37,11 +38,12 @@ export interface MeshHandlerLibrary<TConfig = any, TContext = any> {
   new (options: GetMeshSourceOptions<TConfig>): MeshHandler<TContext>;
 }
 
-export type ResolverData<TParent = any, TArgs = any, TContext = any> = {
+export type ResolverData<TParent = any, TArgs = any, TContext = any, TResult = any> = {
   root?: TParent;
   args?: TArgs;
   context?: TContext;
   info?: GraphQLResolveInfo;
+  result?: TResult;
 };
 
 // Hooks
@@ -66,10 +68,11 @@ export interface MeshPubSub {
 }
 
 export interface MeshTransformOptions<Config = any> {
+  apiName?: string;
   config: Config;
+  baseDir: string;
   cache: KeyValueCache;
   pubsub: MeshPubSub;
-  apiName?: string;
 }
 
 export interface MeshTransformLibrary<Config = any> {

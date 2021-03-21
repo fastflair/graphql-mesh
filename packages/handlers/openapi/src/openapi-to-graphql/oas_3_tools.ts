@@ -120,7 +120,10 @@ export function methodToHttpMethod(method: string): HTTP_METHODS {
  */
 export async function getValidOAS3(spec: Oas2 | Oas3): Promise<Oas3> {
   if (typeof (spec as Oas2).swagger === 'string' && (spec as Oas2).swagger === '2.0') {
-    const { openapi } = await Swagger2OpenAPI.convertObj(spec, {});
+    const { openapi } = await Swagger2OpenAPI.convertObj(spec, {
+      patch: true,
+      warnOnly: true,
+    });
     return openapi;
   } else {
     return spec as Oas3;
@@ -451,23 +454,26 @@ export function getRequestBodyObject(
     if (typeof requestBodyObject.content === 'object') {
       const content: MediaTypesObject = requestBodyObject.content;
 
+      const contentTypes = Object.keys(content);
+      const isJsonContent = contentTypes.some(contentType => contentType.toString().includes('application/json'));
+      const isFormData = contentTypes.some(contentType =>
+        contentType.toString().includes('application/x-www-form-urlencoded')
+      );
+
       // Prioritize content-type JSON
-      if (Object.keys(content).includes('application/json')) {
+      if (isJsonContent) {
         return {
           payloadContentType: 'application/json',
           requestBodyObject,
         };
-      } else if (Object.keys(content).includes('application/x-www-form-urlencoded')) {
+      } else if (isFormData) {
         return {
           payloadContentType: 'application/x-www-form-urlencoded',
           requestBodyObject,
         };
       } else {
-        // Pick first (random) content type
-        const randomContentType = Object.keys(content)[0].toString();
-
         return {
-          payloadContentType: randomContentType,
+          payloadContentType: contentTypes[0].toString(),
           requestBodyObject,
         };
       }
@@ -510,7 +516,11 @@ export function getRequestSchemaAndNames(path: string, operation: OperationObjec
      * Instead, treat the request body as a black box and send it as a string
      * with the proper content-type header
      */
-    if (payloadContentType !== 'application/json' && payloadContentType !== 'application/x-www-form-urlencoded') {
+    if (
+      !payloadContentType.includes('application/json') &&
+      !payloadContentType.includes('application/x-www-form-urlencoded') &&
+      !payloadContentType.includes('*/*')
+    ) {
       const saneContentTypeName = uncapitalize(
         payloadContentType.split('/').reduce((name, term) => {
           return name + capitalize(term);
@@ -568,15 +578,17 @@ export function getResponseObject(
       if (responseObject.content && typeof responseObject.content !== 'undefined') {
         const content: MediaTypesObject = responseObject.content;
 
+        const contentTypes = Object.keys(content);
+        const isJsonContent = contentTypes.some(contentType => contentType.toString().includes('application/json'));
         // Prioritize content-type JSON
-        if (Object.keys(content).includes('application/json')) {
+        if (isJsonContent) {
           return {
             responseContentType: 'application/json',
             responseObject,
           };
         } else {
           // Pick first (random) content type
-          const randomContentType = Object.keys(content)[0].toString();
+          const randomContentType = contentTypes[0].toString();
 
           return {
             responseContentType: randomContentType,
@@ -609,7 +621,11 @@ export function getResponseSchemaAndNames<TSource, TContext, TArgs>(
   const { responseContentType, responseObject } = getResponseObject(operation, statusCode, oas);
 
   if (responseContentType) {
-    let responseSchema = responseObject.content[responseContentType].schema;
+    const contentTypes = Object.keys(responseObject.content);
+    const availableSimilarContentType = contentTypes.find(contentType =>
+      contentType.toString().includes(responseContentType)
+    );
+    let responseSchema = responseObject.content[availableSimilarContentType || contentTypes[0]].schema;
     let fromRef: string;
     if ('$ref' in responseSchema) {
       fromRef = responseSchema.$ref.split('/').pop();
@@ -626,7 +642,7 @@ export function getResponseSchemaAndNames<TSource, TContext, TArgs>(
      * Edge case: if response body content-type is not application/json, do not
      * parse.
      */
-    if (responseContentType !== 'application/json') {
+    if (!responseContentType.includes('application/json') && !responseContentType.includes('*/*')) {
       let description = 'Placeholder to access non-application/json response bodies';
 
       if ('description' in responseSchema && typeof responseSchema.description === 'string') {
@@ -683,7 +699,7 @@ export function getResponseStatusCode<TSource, TContext, TArgs>(
   if (typeof operation.responses === 'object') {
     const codes = Object.keys(operation.responses);
     const successCodes = codes.filter(code => {
-      return SUCCESS_STATUS_RX.test(code.toString());
+      return code === 'default' || SUCCESS_STATUS_RX.test(code.toString());
     });
     if (successCodes.length === 1) {
       return successCodes[0].toString();
@@ -691,7 +707,7 @@ export function getResponseStatusCode<TSource, TContext, TArgs>(
       handleWarning({
         mitigationType: MitigationTypes.MULTIPLE_RESPONSES,
         message:
-          `Operation '${formatOperationString(method, path, oas.info.title)}' ` +
+          `Operation '${formatOperationString(method, path, oas.info?.title)}' ` +
           `contains multiple possible successful response object ` +
           `(HTTP code 200-299 or 2XX). Only one can be chosen.`,
         mitigationAddendum: `The response object with the HTTP code ` + `${successCodes[0]} will be selected`,
@@ -987,6 +1003,11 @@ export function storeSaneName(saneStr: string, str: string, mapping: { [key: str
       `Warning: '${str}' and '${mapping[saneStr]}' both sanitize ` +
         `to '${saneStr}' - collision possible. Desanitize to '${str}'.`
     );
+    let appendix = 2;
+    while (`${saneStr}${appendix}` in mapping) {
+      appendix++;
+    }
+    return storeSaneName(`${saneStr}${appendix}`, str, mapping);
   }
   mapping[saneStr] = str;
 

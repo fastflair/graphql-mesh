@@ -1,5 +1,213 @@
 # @graphql-mesh/types
 
+## 0.35.1
+
+### Patch Changes
+
+- 191a663a: fix(types): baseUrl doesn't need to be required
+
+## 0.35.0
+
+### Minor Changes
+
+- b9ca0c30: Make Transforms and Handlers base-dir aware
+
+## 0.34.1
+
+### Patch Changes
+
+- 55327fd6: fix(config): support arrays and singular values for additionalTypeDefs
+
+## 0.34.0
+
+### Minor Changes
+
+- 76051dd7: feat(serve): ability to change GraphQL endpoint path
+
+## 0.33.0
+
+### Minor Changes
+
+- 646d6bdb: feat(rename-transform): add bare option
+
+## 0.32.0
+
+### Minor Changes
+
+- 68d6b117: feat(postgraphile): add ability to disable live queries and subscriptions
+
+## 0.31.1
+
+### Patch Changes
+
+- 212f2d66: fix(postgraphile): caching
+
+## 0.31.0
+
+### Minor Changes
+
+- 77327988: feat(runtime): Live Queries Support
+
+## 0.30.1
+
+### Patch Changes
+
+- 48f38a4a: fix(config): allow array of strings in cors configuration
+
+## 0.30.0
+
+### Minor Changes
+
+- 938cca26: feat(json-schema): allow custom error property with errorMessageField
+
+## 0.29.4
+
+### Patch Changes
+
+- 8ef29de1: feat(soap): ability to provide custom headers
+
+## 0.29.3
+
+### Patch Changes
+
+- a02d86c3: feat(serve): add HTTPS support
+- a02d86c3: fix(runtime): patch graphql-compose schemas to support @defer and @stream
+- a02d86c3: feat(serve): ability to change binding hostname
+
+## 0.29.2
+
+### Patch Changes
+
+- 8e8848e1: feat(serve): ability to change maxRequestBodySize
+
+## 0.29.1
+
+### Patch Changes
+
+- e8994875: feat(serve): ability to change maxFileSize and maxFiles for graphql-upload
+
+## 0.29.0
+
+### Minor Changes
+
+- 183cfa96: feat(grpc): add reflection and file descriptor set support
+
+  This change adds two new features to the gRPC handler.
+
+  - Reflection support
+  - File descriptor set support
+
+  Both of these features make it easier for `graphql-mesh` to automatically create a schema for gRPC.
+
+  ### `useReflection: boolean`
+
+  This config option enables `graphql-mesh` to generate a schema by querying the gRPC reflection endpoints. This feature is enabled by the [`grpc-reflection-js`](https://github.com/redhoyasa/grpc-reflection-js) package.
+
+  ### `descriptorSetFilePath: object | string`
+
+  This config option enabled `graphql-mesh` to generate a schema by importing either a binary-encoded file descriptor set file or a JSON file descriptor set file. This config works just like `protoFilePath` and can be a string or an object containing the file and proto loader options.
+
+  Binary-encoded file descriptor sets can be created by using `protoc` with the `--descriptor_set_out` option. Example:
+
+  ```sh
+  protoc -I . --descriptor_set_out=./my-descriptor-set.bin ./my-rpc.proto
+  ```
+
+  JSON file descriptor sets can be created using [`protobufjs/protobuf.js`](https://github.com/protobufjs/protobuf.js#using-json-descriptors).
+
+### Patch Changes
+
+- c767df01: fix(fs): fix fs handling issues for non Node environments
+
+## 0.28.0
+
+### Minor Changes
+
+- a22fc6f3: feat(openapi): customize target root type for an operation and generic payload argument name
+
+## 0.27.0
+
+### Minor Changes
+
+- c1de3e43: feat(cli): add `playground` option to serve configuration
+
+## 0.26.0
+
+### Minor Changes
+
+- 75f6dff9: feat(graphql): ability to disable batch execution
+- c4f207a7: feat(postgraphile): ability to provide custom pgPool instance
+
+## 0.25.0
+
+### Minor Changes
+
+- 0df817d0: feat(graphql): support exported schemaHeaders
+
+## 0.24.0
+
+### Minor Changes
+
+- b6262481: feat(snapshot): add respectSelectionSet for advanced snapshot
+
+## 0.23.3
+
+### Patch Changes
+
+- e5b38574: introduce extend transform
+
+## 0.23.2
+
+### Patch Changes
+
+- c614e796: fix(types): fix config schema
+
+## 0.23.1
+
+### Patch Changes
+
+- 59d77fb8: fix(encapsulate): fix transform config
+
+## 0.23.0
+
+### Minor Changes
+
+- e5cd44f5: feat(rename): support rename transform
+
+## 0.22.0
+
+### Minor Changes
+
+- 2fd59a83: feat(graphql): add useSSEForSubscription option to use SSE for Subscriptions instead of WebSocket
+
+## 0.21.1
+
+### Patch Changes
+
+- c064e3a8: Fix minor issues with schema wrapping, updated types
+
+## 0.21.0
+
+### Minor Changes
+
+- 03f41cd0: feat(graphql): support exported GraphQLSchema from code files
+
+## 0.20.1
+
+### Patch Changes
+
+- 1e7fd602: feat(graphql): add `multipart` option to support file uploads
+
+## 0.20.0
+
+### Minor Changes
+
+- 2d14fcc3: bump graphql-tools to v7
+
+### Patch Changes
+
+- 2d14fcc3: fix(json-schema): make method optional to create nonexecutable schema
+
 ## 0.19.0
 
 ### Minor Changes
